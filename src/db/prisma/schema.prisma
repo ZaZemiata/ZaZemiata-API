@@ -13,6 +13,8 @@ model CrawlTasks {
   completed_at DateTime?
   error        String?
   created_at   DateTime        @default(now())
+  source_id    BigInt
+  Sources      Sources         @relation(fields: [source_id], references: [id])
 }
 
 model CrawledData {
@@ -61,6 +63,7 @@ model Sources {
   scrape_frequency_seconds Float
   active                   Boolean
   created_at               DateTime     @default(now())
+  CrawlTasks               CrawlTasks[]
   Settings                 Settings[]
   SourceUrls               SourceUrls[]
 }
