@@ -1,6 +1,5 @@
 import express from 'express';
-import keywordRoutes from './routes/keyWords';
-import sourceRouter from './routes/sourceRouter';
+import router from "./router"
 import { enableBigIntSerialization } from './utils/bigInt';
 
 // Enable serialization of BigInts
@@ -12,9 +11,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-// Routes
-app.use('/api/keywords', keywordRoutes);
-app.use('/api/sources', sourceRouter);
+// Router
+app.use(router);
 
 app.listen(3000, () => {
 
