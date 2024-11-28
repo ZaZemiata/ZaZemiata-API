@@ -24,10 +24,10 @@ export const updateSourceActiveStatus = async (id: number, active: boolean) => {
         const updatedSource = await prisma.sources.update({
 
             // Find the source by ID
-            where: { id: id }, 
-            
+            where: { id: id },
+
             // Update the 'active' field
-            data: { active: active }, 
+            data: { active: active },
         });
 
         // Return the updated source object
