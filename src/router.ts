@@ -8,14 +8,14 @@
 
 // Import dependencies
 import express from "express"
-import keyWordsController from "./controllers/keyWordsController"
+import keyWordController from "./controllers/keyWordController"
 import sourceController from "./controllers/sourceController"
 
 //Crete a router
 const router = express.Router();
 
 //Add controllers to router
-router.use(keyWordsController)
+router.use(keyWordController)
 router.use(sourceController)
 
 //Export a router

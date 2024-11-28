@@ -1,13 +1,14 @@
 /**
  * KeyWords Service
  * 
- * @module keyWords.ts
+ * @module keyWordService.ts
  * @author Daniel Dimitrov <danieldimitrov2304@gmail.com>
  */
 
 import prisma from '../db/prisma/prisma';
 import { Request, Response } from 'express';
-import { KeyWordType } from '../types/keywordType';
+import { KeyWords } from '@prisma/client';
+import { errorHandler } from '../utils/errorHandler';
 
 
 // Get all keywords
@@ -21,14 +22,22 @@ export const getAllKeywords = async (req: Request, res: Response) => {
 };
 
 
-export const updateKeyWord = async (body: KeyWordType) => {
+export const updateKeyWord = async (body: KeyWords) => {
+
+
     try {
 
+        //Error handling
+        errorHandler(body, "UPDATE")
+
+        //Update keyword
         await prisma.keyWords.update({
+            // Specify the unique identifier
             where: {
-                id: Number(body.id), // Specify the unique identifier
+                id: body.id,
             },
-            data: {  //New values
+            //New values
+            data: {
                 word: body.word,
                 priority: body.priority,
                 active: body.active,
@@ -38,17 +47,20 @@ export const updateKeyWord = async (body: KeyWordType) => {
     } catch (error) {
 
         //Catching error and return message
-        throw { message: "An error occurred during the request" }
-
+        throw error
+        
     }
 
 }
 
 
-export const createKeyWord = async (body: KeyWordType) => {
+export const createKeyWord = async (body: KeyWords) => {
     try {
-        
-        //Creating keyword
+
+        //Error handling
+        errorHandler(body, "CREATE")
+
+        //Create keyword
         await prisma.keyWords.create({
             data:
             {
@@ -62,7 +74,7 @@ export const createKeyWord = async (body: KeyWordType) => {
     } catch (error) {
 
         //Catching error and return message
-        throw { message: "An error occurred during the request" }
+        throw error
 
     }
 

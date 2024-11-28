@@ -1,18 +1,18 @@
 /**
  * KeyWords controller
  * 
- * @module keyWords.ts
- * @author Daniel Dimitrov <danieldimitrov2304@gmail.com>
+ * @module keyWordController.ts
+ * @author vadiim  <vadim123bg@gmail.com>
  */
 
 // Import dependencies
-import express from 'express';
-import { getAllKeywords, updateKeyWord, createKeyWord } from '../services/keyWordsService';
-import { KeyWordType } from '../types/keywordType';
-import { ErrorType } from '../types/ErrorType';
+import { Router, Request, Response } from 'express';
+import { getAllKeywords, updateKeyWord, createKeyWord } from '../services/keyWordService';
+import { KeyWords } from '@prisma/client';
+import { ErrorType } from '../types/errorType';
 
 // Create a new router
-const router = express.Router();
+const router = Router();
 
 //Endpoints
 
@@ -20,11 +20,11 @@ const router = express.Router();
 router.get('/api/keywords', getAllKeywords);
 
 //Update keyword
-router.post("/api/keywords", async (req: express.Request, res: express.Response) => {
+router.post("/api/keyword/update", async (req: Request, res: Response) => {
     try {
 
         //Get a keyword from request
-        const keyword: KeyWordType = req.body
+        const keyword: KeyWords = req.body
 
         //Update keyword
         await updateKeyWord(keyword)
@@ -38,12 +38,12 @@ router.post("/api/keywords", async (req: express.Request, res: express.Response)
 
 //Create keyword
 
-router.post("/api/keyword", async (req: express.Request, res: express.Response) => {
+router.post("/api/keyword/add", async (req: Request, res: Response) => {
 
     try {
 
         //Get a keyword from request
-        const keyword: KeyWordType = req.body
+        const keyword: KeyWords = req.body
 
         //Create keyword
         await createKeyWord(keyword)
