@@ -18,15 +18,20 @@ const router = express.Router();
 router.get('/api/sources', getAllSources);
 
 router.patch('/api/sources/:id', async (req, res) => {
-    const { id } = req.params; // Get source ID from the URL parameter
-    const { active } = req.body; // Get the 'active' field from the request body
+
+    // Get source ID from the URL parameter
+    const { id } = req.params; 
+
+    // Get the 'active' field from the request body
+    const { active } = req.body; 
 
     try {
 
         // Call the service to update the 'active' status
         const updatedSource = await updateSourceActiveStatus(Number(id), active);
 
-        res.status(200).json(updatedSource); // Return the updated source
+        // Return the updated source
+        res.status(200).json(updatedSource); 
 
     } catch (error) {
 
