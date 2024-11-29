@@ -7,7 +7,7 @@
 
 // Import dependencies
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { getAllSources, updateSourceActiveStatus } from '../services/sourceService';
 
 
@@ -17,22 +17,29 @@ const router = express.Router();
 //Endpoints
 router.get('/api/sources', getAllSources);
 
-router.patch('/api/sources/:id', async (req, res) => {
+router.post('/api/sources/update-active', async (req: Request, res: Response) => {
+    
+    // Extract `id` and `active` from the request body
+    const { id, active } = req.body;
 
-    // Get source ID from the URL parameter
-    const { id } = req.params; 
+    // Validate `id`
+    if (typeof id !== 'number' || isNaN(id)) {
+        res.status(400).json({ message: 'Invalid or missing "id". It must be a valid number.' });
+        return;
+    }
 
-    // Get the 'active' field from the request body
-    const { active } = req.body; 
+    // Validate `active`
+    if (typeof active !== 'boolean') {
+        res.status(400).json({ message: 'Invalid or missing "active". It must be a boolean value.' });
+        return;
+    }
 
     try {
+        // Call the service to update the active status
+        const updatedSource = await updateSourceActiveStatus(id, active);
 
-        // Call the service to update the 'active' status
-        const updatedSource = await updateSourceActiveStatus(Number(id), active);
-
-        // Return the updated source
-        res.status(200).json(updatedSource); 
-
+        // Return the updated record
+        res.status(200).json(updatedSource);
     } catch (error) {
 
         // Log the error
