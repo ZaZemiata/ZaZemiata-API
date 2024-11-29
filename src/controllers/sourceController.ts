@@ -1,7 +1,7 @@
 /**
  * Source controller
  * 
- * @module source.ts
+ * @module sourceController.ts
  * @author vadiim <vadim123bg@gmail.com>
  */
 

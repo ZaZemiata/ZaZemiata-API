@@ -8,7 +8,7 @@
 // Import dependencies
 import { Router, Request, Response } from 'express';
 import { getAllKeywords, updateKeyWord, createKeyWord } from '../services/keyWordService';
-import { KeyWords } from '@prisma/client';
+import { KeyWords, Priority } from '@prisma/client';
 import { ErrorType } from '../types/errorType';
 
 // Create a new router
@@ -20,19 +20,32 @@ const router = Router();
 router.get('/api/keywords', getAllKeywords);
 
 //Update keyword
-router.post("/api/keyword/update", async (req: Request, res: Response) => {
+router.patch("/api/keyword/update", async (req: Request, res: Response) => {
     try {
 
         //Get a keyword from request
         const keyword: KeyWords = req.body
 
-        //Update keyword
-        await updateKeyWord(keyword)
+        if (!keyword.id) throw Error("No such ID exists in the database!")
 
-        res.send({ updated: true })
+        if (isNaN(Number(keyword.id)) && typeof (keyword.id) != "number" && typeof keyword.id != typeof BigInt) throw Error("Invalid ID type, ID cant be this type!")
+
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) throw Error("Invalid PRIORITY type, PRIORITY cant be this type!")
+
+        if (keyword.active && typeof keyword.active != "boolean") throw Error(`Invalid "active" type, "active" cant be this type!`)
+
+        //Update keyword
+
+        const data = await updateKeyWord(keyword)
+
+        //Send response
+        res.status(200).send(data)
 
     } catch (error) {
-        res.send((error as ErrorType).message)
+
+        //Catching error and return message
+        res.status(500).send((error as ErrorType).message)
+
     }
 })
 
@@ -45,14 +58,29 @@ router.post("/api/keyword/add", async (req: Request, res: Response) => {
         //Get a keyword from request
         const keyword: KeyWords = req.body
 
+        //Checking for empty fields and wrong values
+
+        if (!keyword.priority) throw Error(`Empty "priority" field!`)
+
+        if (!keyword.word) throw Error(`Empty "word" field!`)
+
+        if (!keyword.active) throw Error(`Empty "active" field!`)
+
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) throw Error("Invalid PRIORITY type, PRIORITY cant be this type!")
+
+        if (typeof keyword.active !== "boolean") throw Error(`Invalid "active" type, "active" cant be this type!`)
+
         //Create keyword
-        await createKeyWord(keyword)
+        const data = await createKeyWord(keyword)
 
-        res.send({ created: true })
-
+        //  Send response
+        res.status(200).send(data)
 
     } catch (error) {
-        res.send((error as ErrorType).message)
+
+        //Catching error and return message
+        res.status(500).send((error as ErrorType).message)
+
     }
 
 })

@@ -8,30 +8,32 @@
 import prisma from '../db/prisma/prisma';
 import { Request, Response } from 'express';
 import { KeyWords } from '@prisma/client';
-import { errorHandler } from '../utils/errorHandler';
-
 
 // Get all keywords
 export const getAllKeywords = async (req: Request, res: Response) => {
+    try {
 
-    // Get all keywords from the database
-    const keywords = await prisma.keyWords.findMany();
+        // Get all keywords from the database
+        const keywords = await prisma.keyWords.findMany();
 
-    // Send the keywords as a response
-    res.json(keywords);
+        // Send the keywords as a response
+        res.json(keywords);
+
+    } catch (error) {
+
+        //Catching error and return message
+        throw error
+
+    }
 };
 
 
 export const updateKeyWord = async (body: KeyWords) => {
 
-
     try {
 
-        //Error handling
-        errorHandler(body, "UPDATE")
-
         //Update keyword
-        await prisma.keyWords.update({
+        const res = await prisma.keyWords.update({
             // Specify the unique identifier
             where: {
                 id: body.id,
@@ -44,11 +46,14 @@ export const updateKeyWord = async (body: KeyWords) => {
             },
         });
 
+        //Send the keyword as a response
+        return res
+
     } catch (error) {
 
         //Catching error and return message
         throw error
-        
+
     }
 
 }
@@ -57,11 +62,8 @@ export const updateKeyWord = async (body: KeyWords) => {
 export const createKeyWord = async (body: KeyWords) => {
     try {
 
-        //Error handling
-        errorHandler(body, "CREATE")
-
         //Create keyword
-        await prisma.keyWords.create({
+        const res = await prisma.keyWords.create({
             data:
             {
                 word: body.word,
@@ -70,6 +72,10 @@ export const createKeyWord = async (body: KeyWords) => {
                 created_at: new Date()
             }
         });
+
+
+        //Send the keyword as a response
+        return res
 
     } catch (error) {
 
