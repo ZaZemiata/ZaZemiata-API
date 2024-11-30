@@ -17,58 +17,90 @@ const router = Router();
 //Endpoints
 
 //Get all keywords
-router.get('/api/keywords', getAllKeywords);
+router.get('/api/keywords', async (req: Request, res: Response) => {
 
-//Update keyword
-router.patch("/api/keyword/update", async (req: Request, res: Response) => {
+    //Prepare for errors
+    try {
+
+        //Get all keywords
+        const data = await getAllKeywords();
+
+        //Send response
+        res.status(200).send(data)
+    } 
+    
+    //Catch errors
+    catch (error) {
+
+        //Catching error and return message
+        res.status(500).send((error as ErrorType).message)
+    }
+});
+
+//Update keywords
+router.patch('/api/keyword/update', async (req: Request, res: Response) => {
+
+    // Prepare for errors
     try {
 
         //Get a keyword from request
         const keyword: KeyWords = req.body
 
-        if (!keyword.id) throw Error("No such ID exists in the database!")
+        // Missing id
+        if (!keyword.id) 
+            throw Error('No such ID exists in the database!')
 
-        if (isNaN(Number(keyword.id)) && typeof (keyword.id) != "number" && typeof keyword.id != typeof BigInt) throw Error("Invalid ID type, ID cant be this type!")
+        // Invalid ID
+        if (isNaN(Number(keyword.id)) || (typeof keyword.id !== 'number' && typeof keyword.id !== 'bigint')) 
+            throw Error('Invalid ID type, ID must be a number!');
 
-        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) throw Error("Invalid PRIORITY type, PRIORITY cant be this type!")
+        // Check priority type
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) 
+            throw Error('Invalid PRIORITY type!')
 
-        if (keyword.active && typeof keyword.active != "boolean") throw Error(`Invalid "active" type, "active" cant be this type!`)
+        // Check active type
+        if (keyword.active && typeof keyword.active != 'boolean')
+            throw Error(`Invalid 'active' type, 'active' cant be this type!`)
 
         //Update keyword
-
         const data = await updateKeyWord(keyword)
 
         //Send response
         res.status(200).send(data)
 
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
 
         //Catching error and return message
         res.status(500).send((error as ErrorType).message)
-
     }
 })
 
 //Create keyword
-
-router.post("/api/keyword/add", async (req: Request, res: Response) => {
+router.post('/api/keyword/add', async (req: Request, res: Response) => {
 
     try {
 
         //Get a keyword from request
         const keyword: KeyWords = req.body
 
-        //Checking for empty fields and wrong values
+        // Missing priority
+        if (!keyword.priority) 
+            throw Error(`Empty 'priority' field!`)
 
-        if (!keyword.priority) throw Error(`Empty "priority" field!`)
+        // Missing word
+        if (!keyword.word) 
+            throw Error(`Empty 'word' field!`)
 
-        if (!keyword.word) throw Error(`Empty "word" field!`)
+        // Invalid priority type
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) 
+            throw Error('Invalid PRIORITY type!')
 
-        if (!keyword.active) throw Error(`Empty "active" field!`)
-
-        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) throw Error("Invalid PRIORITY type, PRIORITY cant be this type!")
-
-        if (typeof keyword.active !== "boolean") throw Error(`Invalid "active" type, "active" cant be this type!`)
+        // Invalid active type or missing
+        if (!keyword.active || typeof keyword.active !== 'boolean') 
+            throw Error(`Invalid 'active' type!`)
 
         //Create keyword
         const data = await createKeyWord(keyword)
@@ -76,15 +108,15 @@ router.post("/api/keyword/add", async (req: Request, res: Response) => {
         //  Send response
         res.status(200).send(data)
 
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
 
         //Catching error and return message
         res.status(500).send((error as ErrorType).message)
-
     }
-
 })
-
 
 // Export the router
 export default router;

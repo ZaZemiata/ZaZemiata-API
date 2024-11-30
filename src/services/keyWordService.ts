@@ -10,14 +10,14 @@ import { Request, Response } from 'express';
 import { KeyWords } from '@prisma/client';
 
 // Get all keywords
-export const getAllKeywords = async (req: Request, res: Response) => {
+export const getAllKeywords = async () => {
     try {
 
         // Get all keywords from the database
         const keywords = await prisma.keyWords.findMany();
 
-        // Send the keywords as a response
-        res.json(keywords);
+        // Return all keywords
+        return keywords
 
     } catch (error) {
 
