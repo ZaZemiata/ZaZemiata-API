@@ -6,29 +6,34 @@
  */
 
 import prisma from '../db/prisma/prisma';
-import { Request, Response } from 'express';
 
-export const updateSourceUrlActiveStatus = async (req: Request, res: Response) => {
-
-    const { id } = req.params; 
-    const { active } = req.body; 
-
+/**
+ * Updates the active status of a SourceUrl in the database.
+ * 
+ * @param {number} id - The ID of the SourceUrl to update.
+ * @param {boolean} active - The new active status of the SourceUrl.
+ * @returns {Object} The updated SourceUrl object.
+ * @throws Will throw an error if the operation fails.
+ */
+export const updateSourceUrlActiveStatus = async (id: number, active: boolean) => {
     try {
-
+        // Attempt to update the 'active' field of the SourceUrl with the given ID
         const updatedSourceUrl = await prisma.sourceUrls.update({
-            where: { id: Number(id) },
+
+            // Find the SourceUrl by ID
+            where: { id },
+
+            // Update the 'active' field
             data: { active },
         });
 
-        res.json({
-
-            message: "SourceUrl active status updated successfully.",
-            sourceUrl: updatedSourceUrl,
-        });
-
+        // Return the updated SourceUrl object
+        return updatedSourceUrl;
     } catch (error) {
+        // Log the error
+        console.error("Error updating SourceUrl:", error);
 
-        console.error("Error updating SourceUrl active status:", error);
-        res.status(500).json({ message: "Failed to update SourceUrl active status." });
+        // Rethrow the error so it can be caught by the controller
+        throw error;
     }
 };
