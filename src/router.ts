@@ -8,7 +8,7 @@
 
 // Import dependencies
 import express from "express"
-import keyWordsController from "./controllers/keyWordsController"
+import keyWordController from "./controllers/keyWordController"
 import sourceController from "./controllers/sourceController"
 import crawledDataController from "./controllers/crawledDataController"
 
@@ -16,7 +16,7 @@ import crawledDataController from "./controllers/crawledDataController"
 const router = express.Router();
 
 //Add controllers to router
-router.use(keyWordsController)
+router.use(keyWordController)
 router.use(sourceController)
 router.use(crawledDataController)
 
