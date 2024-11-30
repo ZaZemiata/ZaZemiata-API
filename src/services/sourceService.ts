@@ -5,8 +5,8 @@
  * @author vadiim <vadim123bg@gmail.com>
  */
 
-import prisma from '../db/prisma/prisma';
-import { Request, Response } from 'express';
+import prisma from "../db/prisma/prisma";
+import { Request, Response } from "express";
 
 // Get all keywords
 export const getAllSources = async (req: Request, res: Response) => {
