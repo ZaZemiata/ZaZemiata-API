@@ -15,7 +15,26 @@ import { getAllSources, updateSourceActiveStatus } from '../services/sourceServi
 const router = express.Router();
 
 //Endpoints
-router.get('/api/sources', getAllSources);
+router.get('/api/sources', async (req: Request, res: Response) => {
+
+    // Try to get all sources
+    try {
+
+        // Call the service to get all sources
+        const sources = await getAllSources();
+
+        // Return all sources
+        res.status(200).json(sources);
+    }
+
+    catch (error: any) {
+
+        // Log the error
+        console.error("Error getting sources:", error.message);
+
+        res.status(500).json({ message: error.message });
+    }
+});
 
 router.post('/api/sources/update-active', async (req: Request, res: Response) => {
 

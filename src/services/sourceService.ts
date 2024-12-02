@@ -9,12 +9,27 @@ import prisma from "../db/prisma/prisma";
 import { Request, Response } from "express";
 
 // Get all keywords
-export const getAllSources = async (req: Request, res: Response) => {
-    // Get all sources from the database
-    const sources = await prisma.sources.findMany();
+export const getAllSources = async () => {
 
-    // Send the sources as a response
-    res.json(sources);
+    // Try to get all sources
+    try {
+        
+        // Get all sources from the database
+        const sources = await prisma.sources.findMany();
+
+        // Return all sources
+        return sources;
+    } 
+    
+    // Catching error and return message
+    catch (error: any) {
+
+        // Log the error
+        console.error("Error getting sources:", error.message);
+
+        // Catching error and return message
+        throw error;
+    }
 };
 
 export const updateSourceActiveStatus = async (id: number, active: boolean) => {
