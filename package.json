@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "prisma:generate": "prisma generate --schema src/db/prisma/schema.prisma",
-    "prisma:pull": "prisma db pull --schema src/db/prisma/schema.prisma"
+    "prisma:pull": "prisma db pull --schema src/db/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate dev --schema=src/db/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",
@@ -16,9 +17,13 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "express": "^4.21.1"
+    "@types/jsonwebtoken": "^9.0.7",
+    "bcrypt": "^5.1.1",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.0",
     "prisma": "^5.22.0",
