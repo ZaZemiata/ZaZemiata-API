@@ -10,7 +10,6 @@
 import express, { Request, Response } from 'express';
 import { getAllSources, updateSourceActiveStatus } from '../services/sourceService';
 
-
 // Create a new router
 const router = express.Router();
 
@@ -30,8 +29,9 @@ router.get('/api/sources', async (req: Request, res: Response) => {
     catch (error: any) {
 
         // Log the error
-        console.error("Error getting sources:", error.message);
+        console.error('Error getting sources:', error.message);
 
+        // Return an error response
         res.status(500).json({ message: error.message });
     }
 });
@@ -41,6 +41,7 @@ router.post('/api/sources/update-active', async (req: Request, res: Response) =>
     // Extract `id` and `active` from the request body
     const { id, active } = req.body;
 
+    // Try to update the active status
     try {
 
         // Validate `id`
@@ -62,7 +63,7 @@ router.post('/api/sources/update-active', async (req: Request, res: Response) =>
     } catch (error: any) {
 
         // Log the error
-        console.error("Error updating source:", error.message);
+        console.error('Error updating source:', error.message);
 
         res.status(500).json({ message: error.message });
     }

@@ -6,50 +6,63 @@
  */
 
 //Import dependencies
-import bcrypt from "bcrypt"
-import jwt from "../utils/jwt";
+import bcrypt from "bcrypt";
+import { sign } from "../utils/jwt";
 import prisma from "../db/prisma/prisma";
-
 import { User } from "@prisma/client";
 
-//Register user
+// Register user
 export const registerUser = async (email: string, password: string) => {
 
-    //Hash password
+    // Get salt
     const salt = await bcrypt.genSalt();
+
+    // Hash password
     const saltedHash = await bcrypt.hash(password, salt);
 
-    //Create user
+    // Create user
     const createdUser: User = await prisma.user.create({ data: { email, password: saltedHash, createdAt: new Date() } });
 
-    //Create token
+    // Create token
     const token = await createToken(createdUser.id.toString());
 
-    //Return token
-    return {
-        token
-    }
-}
+    // Return token
+    return { token };
+};
 
-//Get user
-export const getUser = async (email: string) => { return await prisma.user.findUnique({ where: { email: email } }) }
+// Get user
+export const getUser = async (email: string) => {
 
-//Create token
-const createToken = (id: string) => jwt.sign({ userId: id }, process.env.SECRET , { expiresIn: "30d" })
+    // Return user
+    return await prisma.user.findUnique({ where: { email } });
+};
 
-//Check password
-export const checkPassword = async (currentPassword: string, hashedPassword: string) => { return await bcrypt.compare(currentPassword, hashedPassword); }
+// Create token
+const createToken = (id: string) => {
 
-//Login user
+    // Get secret
+    const secret = process.env.SECRET;
+
+    // Check secret
+    if (!secret) throw new Error("JWT Secret not set in environment variables!");
+
+    // Return token
+    return sign({ userId: id }, secret, { expiresIn: "30d" });
+};
+
+// Check password
+export const checkPassword = async (currentPassword: string, hashedPassword: string) => {
+
+    // Return comparison
+    return await bcrypt.compare(currentPassword, hashedPassword);
+};
+
+// Login user
 export const loginUser = async (id: string) => {
-
-
-    //Create token
+    
+    // Create token
     const token = await createToken(id);
 
-    //Return token
-    return {
-        token
-    }
-}
-
+    // Return token
+    return { token };
+};
