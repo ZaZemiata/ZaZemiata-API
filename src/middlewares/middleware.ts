@@ -5,32 +5,59 @@
  * @author vadiim <vadim123bg@gmail.com>
  */
 
-//Import dependencies
+
+// Import dependencies
 import { NextFunction, Request, Response } from "express";
-import config from "../config/config";
-import jwt from "../utils/jwt";
+import { verify } from "../utils/jwt";
 
+// Middleware to check if the user is authenticated
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
+    
+    // Try to authenticate the user
     try {
-        //Get token
-        const token = req.headers["token"]
 
-        //Check token
-        if (!token) {
-            throw Error("Invalid token!")
+        // Get token from the Authorization header
+        const authHeader = req.headers["authorization"];
+
+        // Check if the token exists
+        if (!authHeader) {
+
+            // Return an error response
+            res.status(401).send({ error: "Unauthorized: No token provided" });
+            return; 
         }
 
+        // Check if the token is in the correct format
+        if (!authHeader.startsWith('Bearer ')) {
 
+            // Return an error response
+            res.status(401).send({ error: 'Unauthorized: Invalid format' });
+            return;
+        }
 
-        //Decode token
-        const decodedToken = await jwt.verify(token, config.SECRET);
-        next()
+        // Extract token from the Authorization header
+        const token = authHeader.split(" ")[1];
 
-    } catch (error) {
+        // Verify the token
+        const decodedToken = await verify(token, process.env.SECRET as string);
+        
+        // Check if the token is valid
+        if (!decodedToken) {
 
-        //Throw error
-        throw Error("Invalid token!")
+            // Return an error response
+            res.status(401).send({ error: "Unauthorized: Invalid token" });
+            return; 
+        }
 
+        // Proceed to the next middleware or route
+        next();
+
+    } 
+    
+    // Catch errors
+    catch (error) {
+
+        // Return an error response
+        res.status(401).send({ error: "Unauthorized: Invalid token" });
     }
-
-}
+};
