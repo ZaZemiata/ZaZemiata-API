@@ -16,8 +16,8 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
         // Get all crawled data from database
         const crawledData = await prisma.crawledData.findMany();
 
-        // Send the crawled data as a response
-        res.json(crawledData);
+      // Return all crawled data
+       return crawledData
     } 
     
     // Catch errors
