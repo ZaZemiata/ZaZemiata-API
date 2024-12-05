@@ -10,7 +10,6 @@ import { Router, Request, Response } from 'express';
 import { getAllKeywords, updateKeyWord, createKeyWord } from '../services/keyWordService';
 import { KeyWords, Priority } from '@prisma/client';
 import { ErrorType } from '../types/errorType';
-import { isAuthenticated } from '../middlewares/middleware';
 
 // Create a new router
 const router = Router();
@@ -28,8 +27,8 @@ router.get('/api/keywords', async (req: Request, res: Response) => {
 
         //Send response
         res.status(200).send(data)
-    } 
-    
+    }
+
     //Catch errors
     catch (error) {
 
@@ -48,20 +47,31 @@ router.patch('/api/keyword/update', async (req: Request, res: Response) => {
         const keyword: KeyWords = req.body
 
         // Missing id
-        if (!keyword.id)
-            throw Error('No such ID exists in the database!')
+        if (!keyword.id) {
+            res.status(400).send({ error: 'No such ID exists in the database!' });
+            return;
+        }
+
+
 
         // Invalid ID
-        if (isNaN(Number(keyword.id)) || (typeof keyword.id !== 'number' && typeof keyword.id !== 'bigint'))
-            throw Error('Invalid ID type, ID must be a number!');
+        if (isNaN(Number(keyword.id)) || (typeof keyword.id !== 'number' && typeof keyword.id !== 'bigint')) {
+            res.status(400).send({ error: 'ID must be a number!' });
+            return;
+        }
+
 
         // Check priority type
-        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority))
-            throw Error('Invalid PRIORITY type!')
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) {
+            res.status(400).send({ error: 'Invalid PRIORITY type!' });
+            return;
+        }
 
         // Check active type
-        if (keyword.active && typeof keyword.active != 'boolean')
-            throw Error(`Invalid 'active' type, 'active' cant be this type!`)
+        if (keyword.active && typeof keyword.active != 'boolean') {
+            res.status(400).send({ error: 'Invalid "active" type!' });
+            return;
+        }
 
         //Update keyword
         const data = await updateKeyWord(keyword)
@@ -88,21 +98,29 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
         const keyword: KeyWords = req.body
 
         // Missing priority
-        if (!keyword.priority)
-            throw Error(`Empty 'priority' field!`)
+        if (!keyword.priority) {
+            res.status(400).send({ error: 'Missing "priority" field!' });
+            return;
+        }
 
         // Missing word
-        if (!keyword.word)
-            throw Error(`Empty 'word' field!`)
+        if (!keyword.word) {
+            res.status(400).send({ error: 'Missing "word" field!' });
+            return;
+        }
 
         // Invalid priority type
-        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority))
-            throw Error('Invalid PRIORITY type!')
+        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) {
+            res.status(400).send({ error: 'Invalid PRIORITY type!' });
+            return;
+        }
 
         // Invalid active type or missing
-        if (!keyword.active || typeof keyword.active !== 'boolean')
-            throw Error(`Invalid 'active' type!`)
-
+        if (!keyword.active || typeof keyword.active !== 'boolean') {
+            res.status(400).send({ error: 'Invalid "active" type!' });
+            return;
+        
+        }
         //Create keyword
         const data = await createKeyWord(keyword)
 
