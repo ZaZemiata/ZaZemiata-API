@@ -52,8 +52,6 @@ router.patch('/api/keyword/update', async (req: Request, res: Response) => {
             return;
         }
 
-
-
         // Invalid ID
         if (isNaN(Number(keyword.id)) || (typeof keyword.id !== 'number' && typeof keyword.id !== 'bigint')) {
             res.status(400).send({ error: 'ID must be a number!' });
@@ -78,7 +76,6 @@ router.patch('/api/keyword/update', async (req: Request, res: Response) => {
 
         //Send response
         res.status(200).send(data)
-
     }
 
     // Catch errors
@@ -125,15 +122,14 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
         const data = await createKeyWord(keyword)
 
         //  Send response
-        res.status(200).send(data)
-
+        res.status(200).send(data);
     }
 
     // Catch errors
     catch (error) {
 
         //Catching error and return message
-        res.status(500).send((error as ErrorType).message)
+        res.status(500).send((error as ErrorType).message);
     }
 })
 
