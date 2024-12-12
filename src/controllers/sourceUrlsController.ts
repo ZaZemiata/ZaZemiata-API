@@ -8,6 +8,7 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { updateSourceUrlActiveStatus } from '../services/sourceUrlsService';
+import logger from '../utils/logger'; // Import winston logger
 
 const router = express.Router();
 
@@ -37,18 +38,25 @@ router.post('/api/source-urls/update-active', async (req: Request, res: Response
             return;
         }
 
+        // Log the action
+        logger.info(`Updating SourceUrl with id: ${id}, active status: ${active}`);
+
         // Call the service to update the active status
         const updatedSourceUrl = await updateSourceUrlActiveStatus(id, active);
+
+        // Log success
+        logger.info(`Successfully updated SourceUrl with id: ${id}`);
 
         // Return the updated record
         res.status(200).json(updatedSourceUrl);
 
     } catch (error: any) {
         // Log the error
-        console.error("Error updating SourceUrl:", error.message);
+        logger.error(`Error updating SourceUrl: ${error.message}`);
 
         // Respond with an error message
         res.status(500).json({ message: error.message });
     }
 });
+
 export default router;
