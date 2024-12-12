@@ -6,21 +6,27 @@
  */
 
 // Import dependencies
-
 import express, { Request, Response } from 'express';
 import { getAllSources, updateSourceActiveStatus } from '../services/sourceService';
+import logger from '../utils/logger'; // Import logger
 
 // Create a new router
 const router = express.Router();
 
-//Endpoints
+// Endpoints
 router.get('/api/sources', async (req: Request, res: Response) => {
 
     // Try to get all sources
     try {
 
+        // Log the request
+        logger.info("Fetching all sources...");
+
         // Call the service to get all sources
         const sources = await getAllSources();
+
+        // Log success
+        logger.info(`Successfully fetched ${sources.length} sources.`);
 
         // Return all sources
         res.status(200).json(sources);
@@ -29,7 +35,7 @@ router.get('/api/sources', async (req: Request, res: Response) => {
     catch (error: any) {
 
         // Log the error
-        console.error('Error getting sources:', error.message);
+        logger.error(`Error getting sources: ${error.message}`);
 
         // Return an error response
         res.status(500).json({ message: error.message });
@@ -56,8 +62,14 @@ router.post('/api/sources/update-active', async (req: Request, res: Response) =>
             return;
         }
 
+        // Log the update action
+        logger.info(`Updating source with id: ${id}, active status: ${active}`);
+
         // Call the service to update the active status
         const updatedSource = await updateSourceActiveStatus(id, active);
+
+        // Log success
+        logger.info(`Successfully updated source with id: ${id}`);
 
         // Return the updated record
         res.status(200).json(updatedSource);
@@ -65,7 +77,7 @@ router.post('/api/sources/update-active', async (req: Request, res: Response) =>
     } catch (error: any) {
 
         // Log the error
-        console.error('Error updating source:', error.message);
+        logger.error(`Error updating source: ${error.message}`);
 
         res.status(500).json({ message: error.message });
     }
