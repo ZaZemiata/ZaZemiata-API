@@ -2,32 +2,28 @@
  * Source Service
  *
  * @module source.ts
- * @author vadiim <vadim123bg@gmail.com>
+ * @authowr vadiim <vadim123bg@gmail.com>
  */
 
 import prisma from "../db/prisma/prisma";
-import { Request, Response } from "express";
+import logger from "../utils/logger"; // Import winston logger
 
-// Get all keywords
+// Get all sources
 export const getAllSources = async () => {
-
-    // Try to get all sources
     try {
-        
         // Get all sources from the database
         const sources = await prisma.sources.findMany();
 
+        // Log success
+        logger.info("Fetched all sources successfully.");
+
         // Return all sources
         return sources;
-    } 
-    
-    // Catching error and return message
-    catch (error: any) {
-
+    } catch (error: any) {
         // Log the error
-        console.error("Error getting sources:", error.message);
+        logger.error("Error getting sources:", error.message);
 
-        // Catching error and return message
+        // Rethrow the error
         throw error;
     }
 };
@@ -36,7 +32,6 @@ export const updateSourceActiveStatus = async (id: number, active: boolean) => {
     try {
         // Attempt to update the 'active' field of the source with the given ID
         const updatedSource = await prisma.sources.update({
-
             // Find the source by ID
             where: { id: id },
 
@@ -44,13 +39,16 @@ export const updateSourceActiveStatus = async (id: number, active: boolean) => {
             data: { active: active },
         });
 
+        // Log success
+        logger.info(`Source with ID ${id} updated successfully to active status: ${active}.`);
+
         // Return the updated source object
         return updatedSource;
     } catch (error) {
         // Log the error
-        console.error("Error updating source:", error);
+        logger.error(`Error updating source with ID ${id}:`, error);
 
-        // Rethrow the error so it can be caught by the controller
+        // Rethrow the error
         throw error;
     }
 };

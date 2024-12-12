@@ -2,10 +2,11 @@
  * SourceUrls Service
  * 
  * @module sourceUrlsService.ts
- * @author Geno Popov <geno_popov@yahoo.com>
+ * @author 
  */
 
 import prisma from '../db/prisma/prisma';
+import logger from "../utils/logger"; // Import winston logger
 
 /**
  * Updates the active status of a SourceUrl in the database.
@@ -27,11 +28,14 @@ export const updateSourceUrlActiveStatus = async (id: number, active: boolean) =
             data: { active },
         });
 
+        // Log success
+        logger.info(`SourceUrl with ID ${id} updated successfully to active status: ${active}.`);
+
         // Return the updated SourceUrl object
         return updatedSourceUrl;
-    } catch (error) {
+    } catch (error: any) {
         // Log the error
-        console.error("Error updating SourceUrl:", error);
+        logger.error(`Error updating SourceUrl with ID ${id}:`, error.message);
 
         // Rethrow the error so it can be caught by the controller
         throw error;
