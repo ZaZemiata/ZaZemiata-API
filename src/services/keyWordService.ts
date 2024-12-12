@@ -2,43 +2,42 @@
  * KeyWords Service
  * 
  * @module keyWordService.ts
- * @author Daniel Dimitrov <danieldimitrov2304@gmail.com>
+ * @authowr Daniel Dimitrov <danieldimitrov2304@gmail.com>
  */
 
 import prisma from '../db/prisma/prisma';
-import { Request, Response } from 'express';
 import { KeyWords } from '@prisma/client';
+import logger from '../utils/logger'; // Import winston logger
 
 // Get all keywords
 export const getAllKeywords = async () => {
     try {
-
         // Get all keywords from the database
         const keywords = await prisma.keyWords.findMany();
 
+        // Log success
+        logger.info("Fetched all keywords successfully.");
+
         // Return all keywords
-        return keywords
-
+        return keywords;
     } catch (error) {
+        // Log the error
+        logger.error("Error fetching keywords:", error);
 
-        //Catching error and return message
-        throw error
-
+        // Rethrow the error
+        throw error;
     }
 };
 
-
 export const updateKeyWord = async (body: KeyWords) => {
-
     try {
-
-        //Update keyword
+        // Update keyword
         const res = await prisma.keyWords.update({
             // Specify the unique identifier
             where: {
                 id: body.id,
             },
-            //New values
+            // New values
             data: {
                 word: body.word,
                 priority: body.priority,
@@ -46,42 +45,42 @@ export const updateKeyWord = async (body: KeyWords) => {
             },
         });
 
-        //Send the keyword as a response
-        return res
+        // Log success
+        logger.info(`Keyword with ID ${body.id} updated successfully.`);
 
+        // Send the keyword as a response
+        return res;
     } catch (error) {
+        // Log the error
+        logger.error(`Error updating keyword with ID ${body.id}:`, error);
 
-        //Catching error and return message
-        throw error
-
+        // Rethrow the error
+        throw error;
     }
-
-}
-
+};
 
 export const createKeyWord = async (body: KeyWords) => {
     try {
-
-        //Create keyword
+        // Create keyword
         const res = await prisma.keyWords.create({
-            data:
-            {
+            data: {
                 word: body.word,
                 priority: body.priority,
                 active: body.active,
-                created_at: new Date()
-            }
+                created_at: new Date(),
+            },
         });
 
+        // Log success
+        logger.info(`Keyword "${body.word}" created successfully.`);
 
-        //Send the keyword as a response
-        return res
-
+        // Send the keyword as a response
+        return res;
     } catch (error) {
+        // Log the error
+        logger.error(`Error creating keyword "${body.word}":`, error);
 
-        //Catching error and return message
-        throw error
-
+        // Rethrow the error
+        throw error;
     }
-
-}
+};
