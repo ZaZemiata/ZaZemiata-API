@@ -59,9 +59,6 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
         // Check total value and set default
         const totalPages = result.total ?? 1;
 
-        // Check if current page is greater then total pages
-        if (currentPage > totalPages) throw new Error("Current page is greater than total pages!");
-
         // Define prev and next constants, 
         // TODO update "http://localhost:3000/" with env variable
         const next = currentPage < totalPages ? `http://localhost:3000/api/crawled-data/paginated?page=${currentPage + 1}&limit=${currentLimit}` : null;
