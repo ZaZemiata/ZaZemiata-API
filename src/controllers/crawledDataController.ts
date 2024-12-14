@@ -10,6 +10,7 @@
 import { Router, Request, Response } from "express";
 import { getAllCrawledData, getCrawledDataPagination } from "../services/crawledDataService";
 import { ErrorType } from "../types/errorType";
+import logger from "../utils/logger";
 
 // Create a new router
 const router = Router();
@@ -20,13 +21,22 @@ const router = Router();
  */
 router.get("/api/crawled-data", async (req: Request, res: Response) => {
 
+    // Try to fetch data
     try {
         // Call the service
         const data = await getAllCrawledData(req, res)
 
+        logger.info("Fetched all crawled data successfully.");
+
         // Send response
         res.status(200).send(data)
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
+
+        logger.error(error);
+
         // Log the error and respond with an error message
         res.status(500).send((error as ErrorType).message)
     }
@@ -37,6 +47,7 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
  * @description Fetch CrawledData records based on page and limit query params.
  */
 router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
+    
     // Define default variables
     let currentPage = 1;
     let currentLimit = 10;
@@ -44,10 +55,16 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
     // Get query params
     const {page, limit} = req.query;
 
+    // Try to fetch data
     try {
-        // Validate if query params are negative or zero
-        if (isNaN(Number(page)) && Number(page) < 1) throw new Error("Page must be a positive number, greater or equal to 1!");
-        if (isNaN(Number(limit)) && Number(limit) < 1) throw new Error("Limit must be a positive number, greater or equal to 1!");
+
+        // Validate page query param
+        if (isNaN(Number(page)) && Number(page) < 1) 
+            throw new Error("Page must be a positive number, greater or equal to 1!");
+
+        // Validate limit query param
+        if (isNaN(Number(limit)) && Number(limit) < 1) 
+            throw new Error("Limit must be a positive number, greater or equal to 1!");
 
         // Update default params with provided query params
         currentPage = Number(page ?? currentPage);
@@ -72,6 +89,9 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
             prev
         };
 
+        // Log success
+        logger.info(`Fetched ${totalPages} pages from CrawledData table`);
+
         // Send response
         res.status(200).send({
             status: 'success',
@@ -79,7 +99,12 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
             data: result.data
         });
     }
+
+    // Catch errors
     catch (error) {
+
+        logger.error(error);
+
         // Log the error and respond with an error message
         res.status(400).send({
                 status: 'error',
@@ -90,4 +115,3 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
 
 // Export the router
 export default router;
-
