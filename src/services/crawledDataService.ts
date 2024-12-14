@@ -13,7 +13,10 @@ import { PaginationResult } from "../types/pagination";  // Import types
 
 // Get all CrawledData records with related SourceUrls and Sources
 export const getAllCrawledData = async (req: Request, res: Response) => {
+
+    // Try to fetch data
     try {
+        
         // Get all crawled data from the database
         const crawledData = await prisma.crawledData.findMany();
 
@@ -22,7 +25,11 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
 
         // Return all crawled data
         return crawledData;
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
+
         // Log the error
         logger.error("Error fetching crawled data:", error);
 
@@ -33,6 +40,8 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
 
 // Get limited CrawledData records based on pagination provided in query params
 export const getCrawledDataPagination = async (page: number, limit: number): Promise<PaginationResult> => {
+
+    // Try to fetch data
     try {
         // Get total records of crawled data
         const totalEntries = await prisma.crawledData.count();
@@ -51,9 +60,11 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
 
         // Return all crawled data
         return {data, total};
-
+    } 
+    
     // Catch errors 
-    } catch (error) {
+    catch (error) {
+
         // Log the error
         logger.error("Error fetching crawled data:", error);
         
