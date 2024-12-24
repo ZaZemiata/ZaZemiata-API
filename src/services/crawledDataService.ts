@@ -16,7 +16,7 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
 
     // Try to fetch data
     try {
-        
+
         // Get all crawled data from the database
         const crawledData = await prisma.crawledData.findMany();
 
@@ -25,8 +25,8 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
 
         // Return all crawled data
         return crawledData;
-    } 
-    
+    }
+
     // Catch errors
     catch (error) {
 
@@ -50,8 +50,23 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
         const data = await prisma.crawledData.findMany({
             take: limit,
             skip: (page - 1) * limit,
-        });
 
+            // Include related SourceUrls and Sources
+            include: {
+                SourceUrls: {
+                    select: {
+                        Sources: {
+                            
+                            // Select only site_name
+                            select: {
+                                site_name: true, 
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        
         // Calculate total pages
         const total = Math.ceil(totalEntries / limit);
 
@@ -59,16 +74,16 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
         logger.info("Fetched filtered crawled data successfully.");
 
         // Return all crawled data
-        return {data, total};
-    } 
-    
+        return { data, total };
+    }
+
     // Catch errors 
     catch (error) {
 
         // Log the error
         logger.error("Error fetching crawled data:", error);
-        
+
         // Return error object
-        return {error: (error as Error).message};
+        return { error: (error as Error).message };
     }
 };
