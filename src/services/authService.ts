@@ -9,7 +9,8 @@
 import bcrypt from "bcrypt";
 import { sign } from "../utils/jwt";
 import prisma from "../db/prisma/prisma";
-import { User } from "@prisma/client";
+import { Users } from "@prisma/client";
+import logger from "../utils/logger";
 
 // Register user
 export const registerUser = async (email: string, password: string) => {
@@ -21,7 +22,7 @@ export const registerUser = async (email: string, password: string) => {
     const saltedHash = await bcrypt.hash(password, salt);
 
     // Create user
-    const createdUser: User = await prisma.user.create({ data: { email, password: saltedHash, createdAt: new Date() } });
+    const createdUser: Users = await prisma.users.create({ data: { email, password: saltedHash, created_at: new Date() } });
 
     // Create token
     const token = await createToken(createdUser.id.toString());
@@ -34,7 +35,7 @@ export const registerUser = async (email: string, password: string) => {
 export const getUser = async (email: string) => {
 
     // Return user
-    return await prisma.user.findUnique({ where: { email } });
+    return await prisma.users.findUnique({ where: { email } });
 };
 
 // Create token
@@ -70,7 +71,7 @@ export const loginUser = async (id: string) => {
 export const isUserAdmin = async (userId: number) => {
     
     // Get user
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const user = await prisma.users.findUnique({ where: { id: userId } });
 
     // Check user
     if (!user) throw new Error("User not found!");
