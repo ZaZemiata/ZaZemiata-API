@@ -9,7 +9,8 @@
     "start": "node dist/app.js",
     "prisma:generate": "prisma generate --schema src/db/prisma/schema.prisma",
     "prisma:pull": "prisma db pull --schema src/db/prisma/schema.prisma",
-    "prisma:migrate": "npx prisma migrate dev --schema=src/db/prisma/schema.prisma"
+    "prisma:migrate": "npx prisma migrate dev --schema=src/db/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema src/db/prisma/schema.prisma"
   },
   "keywords": [],
   "author": "",

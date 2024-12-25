@@ -66,3 +66,15 @@ export const loginUser = async (id: string) => {
     // Return token
     return { token };
 };
+
+export const isUserAdmin = async (userId: number) => {
+    
+    // Get user
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    // Check user
+    if (!user) throw new Error("User not found!");
+
+    // Return user
+    return user.is_admin;
+}

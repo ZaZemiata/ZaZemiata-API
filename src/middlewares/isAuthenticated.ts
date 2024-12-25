@@ -5,7 +5,6 @@
  * @author vadiim <vadim123bg@gmail.com>
  */
 
-
 // Import dependencies
 import { NextFunction, Request, Response } from "express";
 import { verify } from "../utils/jwt";
@@ -39,7 +38,7 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
         const token = authHeader.split(" ")[1];
 
         // Verify the token
-        const decodedToken = await verify(token, process.env.SECRET as string);
+        const decodedToken = await verify(token, process.env.SECRET as string) as { userId: string };
         
         // Check if the token is valid
         if (!decodedToken) {
@@ -49,9 +48,11 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
             return; 
         }
 
+        // Store the user ID in the request object
+        (req as any).user = { id: decodedToken.userId };
+
         // Proceed to the next middleware or route
         next();
-
     } 
     
     // Catch errors

@@ -9,12 +9,13 @@
 import { Router, Request, Response } from 'express';
 import { registerUser, loginUser, getUser, checkPassword } from '../services/authService';
 import logger from '../utils/logger';
+import { isAdmin } from '../middlewares/isAdmin';
 
 //Create a router
 const router = Router();
 
 //Register endpoint
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', isAdmin, async (req: Request, res: Response) => {
     const { email, password, repassword } = req.body;
 
     try {
