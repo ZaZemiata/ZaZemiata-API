@@ -52,13 +52,13 @@ router.post('/api/sources/update-active', async (req: Request, res: Response) =>
 
         // Validate `id`
         if (typeof id !== 'number' || isNaN(id)) {
-            res.status(400).send({ error: 'Invalid or missing "id". It must be a valid number.' });
+            res.status(400).send({ message: 'Invalid or missing "id". It must be a valid number.' });
             return;
         }
 
         // Validate `active`
         if (typeof active !== 'boolean') {
-            res.status(400).send({ error: 'Invalid or missing "active". It must be a boolean value.' });
+            res.status(400).send({ message: 'Invalid or missing "active". It must be a boolean value.' });
             return;
         }
 

@@ -96,25 +96,25 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
 
         // Missing priority
         if (!keyword.priority) {
-            res.status(400).send({ error: 'Missing "priority" field!' });
+            res.status(400).send({ message: 'Missing "priority" field!' });
             return;
         }
 
         // Missing word
         if (!keyword.word) {
-            res.status(400).send({ error: 'Missing "word" field!' });
+            res.status(400).send({ message: 'Missing "word" field!' });
             return;
         }
 
         // Invalid priority type
         if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) {
-            res.status(400).send({ error: 'Invalid PRIORITY type!' });
+            res.status(400).send({ message: 'Invalid PRIORITY type!' });
             return;
         }
 
         // Invalid active type or missing
         if (!keyword.active || typeof keyword.active !== 'boolean') {
-            res.status(400).send({ error: 'Invalid "active" type!' });
+            res.status(400).send({ message: 'Invalid "active" type!' });
             return;
         
         }

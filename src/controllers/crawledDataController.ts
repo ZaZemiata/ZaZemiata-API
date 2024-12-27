@@ -108,7 +108,7 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
         // Log the error and respond with an error message
         res.status(400).send({
                 status: 'error',
-                error: (error as ErrorType).message
+                message: (error as ErrorType).message
         })
     }
 });
