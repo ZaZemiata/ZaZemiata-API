@@ -64,8 +64,11 @@ export const loginUser = async (id: string) => {
     // Create token
     const token = await createToken(id);
 
-    // Return token
-    return { token };
+    // Check if user is admin
+    const is_admin = await isUserAdmin(parseInt(id));
+    
+    // Return token and is_admin
+    return { token, is_admin };
 };
 
 export const isUserAdmin = async (userId: number) => {
