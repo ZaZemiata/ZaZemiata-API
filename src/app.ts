@@ -15,7 +15,7 @@ app.use(express.json());
 
 // Log incoming requests
 app.use((req, res, next) => {
-    logger.info(`${req.method} ${req.url}`);
+    logger.info(`METHOD: "${req.method}" | URL: "${req.url}"`);
     next();
 });
 

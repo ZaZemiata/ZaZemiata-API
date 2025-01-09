@@ -7,7 +7,7 @@
 
 // Import dependencies
 import { Router, Request, Response } from 'express';
-import { getAllKeywords, updateKeyWord, createKeyWord } from '../services/keyWordService';
+import { getAllKeywords, updateKeyWord, createKeyWord, deleteKeyWord } from '../services/keyWordService';
 import { KeyWords, Priority } from '@prisma/client';
 import { ErrorType } from '../types/errorType';
 
@@ -116,7 +116,7 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
         if (!keyword.active || typeof keyword.active !== 'boolean') {
             res.status(400).send({ message: 'Invalid "active" type!' });
             return;
-        
+
         }
         //Create keyword
         const data = await createKeyWord(keyword)
@@ -130,6 +130,33 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
 
         //Catching error and return message
         res.status(500).send((error as ErrorType).message);
+    }
+})
+
+router.delete('/api/keyword/delete/:id', async (req: Request, res: Response) => {
+
+    // Prepare for errors
+    try {
+        // Get the keyword ID
+        const keywordId = Number(req.params.id)
+
+        // Check if the ID is valid
+        if (!keywordId)
+            res.status(400).send({ message: 'Invalid ID!' });
+
+        // Delete the keyword
+        const data = await deleteKeyWord(keywordId)
+
+        // Send the result
+        res.status(200).send({ data });
+
+    } 
+    // Catch errors
+    catch (error) {
+
+        //Catching error and return message
+        res.status(500).send((error as ErrorType).message);
+
     }
 })
 
