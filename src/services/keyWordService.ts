@@ -2,7 +2,7 @@
  * KeyWords Service
  * 
  * @module keyWordService.ts
- * @authowr Daniel Dimitrov <danieldimitrov2304@gmail.com>
+ * @author Daniel Dimitrov <danieldimitrov2304@gmail.com>
  */
 
 import prisma from '../db/prisma/prisma';
@@ -84,3 +84,30 @@ export const createKeyWord = async (body: KeyWords) => {
         throw error;
     }
 };
+
+export const deleteKeyWord = async (id: number) => {
+
+    try {
+        // Delete keyword
+        const res = await prisma.keyWords.delete({
+            where: {
+                id
+            },
+        });
+
+        // Return the result and log success
+        logger.info(`Keyword with id: "${id}" successfully deleted.`);
+        return res;
+
+    } 
+    catch (error) {
+
+        // Log error
+        logger.error(`Error deleting keyword with id: "${id}":`, error);
+
+        //Throw error
+        throw error;
+
+    }
+
+}
