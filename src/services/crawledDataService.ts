@@ -18,7 +18,21 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
     try {
 
         // Get all crawled data from the database
-        const crawledData = await prisma.crawledData.findMany();
+        const crawledData = await prisma.crawledData.findMany({
+            include: {
+                SourceUrls: {
+                    select: {
+                        Sources: {
+
+                            // Select only display_name
+                            select: {
+                                display_name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
         // Log success
         logger.info("Fetched all crawled data successfully.");
@@ -56,17 +70,17 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
                 SourceUrls: {
                     select: {
                         Sources: {
-                            
-                            // Select only site_name
+
+                            // Select only display_name
                             select: {
-                                site_name: true, 
+                                display_name: true,
                             },
                         },
                     },
                 },
             },
         });
-        
+
         // Calculate total pages
         const total = Math.ceil(totalEntries / limit);
 
