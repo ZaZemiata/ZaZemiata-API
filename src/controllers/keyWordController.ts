@@ -9,6 +9,7 @@
 import { Router, Request, Response } from 'express';
 import { getAllKeywords, updateKeyWord, createKeyWord, deleteKeyWord } from '../services/keyWordService';
 import { KeyWords, Priority } from '@prisma/client';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
 import { ErrorType } from '../types/errorType';
 
 // Create a new router
@@ -38,7 +39,7 @@ router.get('/api/keywords', async (req: Request, res: Response) => {
 });
 
 //Update keywords
-router.patch('/api/keyword/update', async (req: Request, res: Response) => {
+router.patch('/api/keyword/update', isAuthenticated, async (req: Request, res: Response) => {
 
     // Prepare for errors
     try {
@@ -87,7 +88,7 @@ router.patch('/api/keyword/update', async (req: Request, res: Response) => {
 })
 
 //Create keyword
-router.post('/api/keyword/add', async (req: Request, res: Response) => {
+router.post('/api/keyword/add', isAuthenticated, async (req: Request, res: Response) => {
 
     try {
 
@@ -133,7 +134,7 @@ router.post('/api/keyword/add', async (req: Request, res: Response) => {
     }
 })
 
-router.delete('/api/keyword/delete/:id', async (req: Request, res: Response) => {
+router.delete('/api/keyword/delete/:id', isAuthenticated, async (req: Request, res: Response) => {
 
     // Prepare for errors
     try {
