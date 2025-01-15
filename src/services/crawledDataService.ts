@@ -32,6 +32,9 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
                     },
                 },
             },
+            orderBy: {
+                date: 'asc',
+            },
         });
 
         // Log success
