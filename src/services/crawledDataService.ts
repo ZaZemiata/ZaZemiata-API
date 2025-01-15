@@ -33,7 +33,7 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
                 },
             },
             orderBy: {
-                date: 'asc',
+                date: "desc",
             },
         });
 
@@ -81,6 +81,9 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
                         },
                     },
                 },
+            },
+            orderBy: {
+                date: "desc",
             },
         });
 
