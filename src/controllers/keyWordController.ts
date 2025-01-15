@@ -108,13 +108,13 @@ router.post('/api/keyword/add', isAuthenticated, async (req: Request, res: Respo
         }
 
         // Invalid priority type
-        if (keyword.priority && ![Priority.CRITICAL, Priority.HIGH, Priority.LOW, Priority.MEDIUM].includes(keyword.priority)) {
+        if (keyword.priority && !(keyword.priority in Priority)) {
             res.status(400).send({ message: 'Invalid PRIORITY type!' });
             return;
         }
 
         // Invalid active type or missing
-        if (!keyword.active || typeof keyword.active !== 'boolean') {
+        if (!('active' in keyword) || typeof keyword.active !== 'boolean') {
             res.status(400).send({ message: 'Invalid "active" type!' });
             return;
 
