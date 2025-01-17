@@ -8,7 +8,7 @@
 
 // Import dependencies
 import { Router, Request, Response } from "express";
-import { getAllCrawledData, getCrawledDataPagination } from "../services/crawledDataService";
+import { getAllCrawledData, getCrawledDataPagination, getCrawledDataWithFilters } from "../services/crawledDataService";
 import { ErrorType } from "../types/errorType";
 import logger from "../utils/logger";
 
@@ -47,71 +47,47 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
  * @description Fetch CrawledData records based on page and limit query params.
  */
 router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
-    
-    // Define default variables
-    let currentPage = 1;
-    let currentLimit = 10;
-
-    // Get query params
-    const {page, limit} = req.query;
-
-    // Try to fetch data
     try {
+        // Extract query parameters
+        const { page, limit, РИОСВ, dateBefore, dateAfter, dateExact, containsText } = req.query;
 
-        // Validate page query param
-        if (isNaN(Number(page)) && Number(page) < 1) 
-            throw new Error("Page must be a positive number, greater or equal to 1!");
-
-        // Validate limit query param
-        if (isNaN(Number(limit)) && Number(limit) < 1) 
-            throw new Error("Limit must be a positive number, greater or equal to 1!");
-
-        // Update default params with provided query params
-        currentPage = Number(page ?? currentPage);
-        currentLimit = Number(limit ?? currentLimit);
-
-        // Call the service for pagination
-        const result = await getCrawledDataPagination(currentPage, currentLimit);
-
-        // Check total value and set default
-        const totalPages = result.total ?? 1;
-
-        // Define prev and next constants, 
-        // TODO update "http://localhost:3000/" with env variable
-        const next = currentPage < totalPages ? `http://localhost:3000/api/crawled-data/paginated?page=${currentPage + 1}&limit=${currentLimit}` : null;
-        const prev = currentPage > 1 && currentPage <= totalPages ? `http://localhost:3000/api/crawled-data/paginated?page=${currentPage - 1}&limit=${currentLimit}` : null;
-
-        // Create pagination metadata
-        const pagination = {
-            totalPages,
-            currentPage,
-            next,
-            prev
+        // Convert query parameters to expected types
+        const filters = {
+            page: Number(page) || 1,
+            limit: Number(limit) || 10,
+            РИОСВ: РИОСВ ? String(РИОСВ) : undefined,
+            dateBefore: dateBefore ? String(dateBefore) : undefined,
+            dateAfter: dateAfter ? String(dateAfter) : undefined,
+            dateExact: dateExact ? String(dateExact) : undefined,
+            containsText: containsText ? String(containsText) : undefined,
         };
 
-        // Log success
-        logger.info(`Fetched ${totalPages} pages from CrawledData table`);
+        // Call the service with filters
+        const result = await getCrawledDataWithFilters(filters);
 
-        // Send response
+        // Check if an error occurred
+        if ('error' in result) {
+            throw new Error(result.error);
+        }
+
+        // Send response with data and pagination info
         res.status(200).send({
             status: 'success',
-            pagination,
-            data: result.data
+            pagination: {
+                totalPages: result.total,
+                currentPage: filters.page,
+            },
+            data: result.data,
+        });
+    } catch (error) {
+        logger.error("Error fetching filtered crawled data:", error);
+        res.status(400).send({
+            status: 'error',
+            message: (error as ErrorType).message,
         });
     }
-
-    // Catch errors
-    catch (error) {
-
-        logger.error(error);
-
-        // Log the error and respond with an error message
-        res.status(400).send({
-                status: 'error',
-                message: (error as ErrorType).message
-        })
-    }
 });
+
 
 // Export the router
 export default router;
