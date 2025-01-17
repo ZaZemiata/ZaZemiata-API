@@ -2,14 +2,15 @@
  * CrawledData Service
  *
  * @module crawledDataService.ts
- * @author Hristo Georgiev <hristogeorgiew84@gmail.com>
- * @author Daniel Batanov <batanoff.s@protonmail.com>
+ * @autor Hristo Georgiev <hristogeorgiew84@gmail.com>
+ * @autor Daniel Batanov <batanoff.s@protonmail.com>
  */
 
 import prisma from "../db/prisma/prisma";
 import { Request, Response } from "express";
 import logger from "../utils/logger"; // Import winston logger
 import { PaginationResult } from "../types/pagination";  // Import types
+import { FilterOptions } from '../types/crawledDataFiltres'; //Import filters
 
 // Get all CrawledData records with related SourceUrls and Sources
 export const getAllCrawledData = async (req: Request, res: Response) => {
@@ -107,3 +108,84 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
         return { error: (error as Error).message };
     }
 };
+
+// Get CrawledData records based on different filters
+export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
+    const { page, limit, РИОСВ, dateBefore, dateAfter, dateExact, containsText } = filters;
+
+    try {
+        const whereConditions: any = {};
+
+        // Add РИОСВ filter if provided
+        if (РИОСВ) {
+            whereConditions.SourceUrls = {
+                // Use `some` properly to filter the related Sources
+                some: {
+                    Sources: {
+                        some: {
+                            display_name: {
+                                contains: РИОСВ,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        // Add date filters
+        if (dateExact) {
+            whereConditions.date = new Date(dateExact);
+        } else {
+            if (dateBefore) {
+                whereConditions.date = { lte: new Date(dateBefore) };
+            }
+            if (dateAfter) {
+                whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };
+            }
+        }
+
+        // Add text search filter if provided
+        if (containsText) {
+            whereConditions.OR = [
+                { text: { contains: containsText, mode: "insensitive" } },
+                { title: { contains: containsText, mode: "insensitive" } },
+            ];
+        }
+
+        // Fetch total count of filtered data without select or complex conditions
+        const totalEntries = await prisma.crawledData.count({
+            where: whereConditions, // Apply where conditions directly without unnecessary select or nested structures
+        });
+
+        // Fetch data based on the same where conditions
+        const data = await prisma.crawledData.findMany({
+            where: whereConditions,
+            take: limit,
+            skip: (page - 1) * limit,
+            include: {
+                SourceUrls: {
+                    include: {
+                        Sources: {
+                            select: {
+                                display_name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { date: "desc" },
+        });
+
+        const total = Math.ceil(totalEntries / limit);
+        logger.info("Fetched filtered crawled data successfully.");
+
+        return { data, total };
+    } catch (error) {
+        logger.error("Error fetching filtered crawled data:", error);
+        return { error: (error as Error).message };
+    }
+};
+
+
+
