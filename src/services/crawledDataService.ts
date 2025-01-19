@@ -10,7 +10,7 @@ import prisma from "../db/prisma/prisma";
 import { Request, Response } from "express";
 import logger from "../utils/logger"; // Import winston logger
 import { PaginationResult } from "../types/pagination";  // Import types
-import { FilterOptions } from '../types/crawledDataFiltres'; //Import filters
+import { FilterOptions } from '../types/crawledDataFilters';
 
 // Get all CrawledData records with related SourceUrls and Sources
 export const getAllCrawledData = async (req: Request, res: Response) => {
