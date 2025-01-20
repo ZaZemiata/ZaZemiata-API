@@ -109,25 +109,15 @@ export const getCrawledDataPagination = async (page: number, limit: number): Pro
     }
 };
 
-// Get CrawledData records based on different filters
 export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
-    const { page, limit, РИОСВ, dateBefore, dateAfter, dateExact, containsText } = filters;
+    const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = filters;
 
     try {
         const whereConditions: any = {};
 
-        // Add РИОСВ filter if provided
-        if (РИОСВ) {
-            whereConditions.SourceUrls = {
-                // Use `some` properly to filter the related Sources
-                some: {
-                    Sources: {
-                        some: {
-                            id: РИОСВ, // Search of ID 
-                        },
-                    },
-                },
-            };
+        // Add SourceUrl id filter if provided
+        if (sourceId) {
+            whereConditions.source_url_id = sourceId; // Correctly filter by source_url_id
         }
 
         // Add date filters
@@ -146,13 +136,12 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
         if (containsText) {
             whereConditions.OR = [
                 { text: { contains: containsText, mode: "insensitive" } },
-                { title: { contains: containsText, mode: "insensitive" } },
             ];
         }
 
-        // Fetch total count of filtered data using the whereConditions
+        // Fetch total count of filtered data
         const totalEntries = await prisma.crawledData.count({
-            where: whereConditions,
+            where: whereConditions,  // Directly apply whereConditions
         });
 
         // Fetch data based on the same where conditions
@@ -183,6 +172,21 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
         return { error: (error as Error).message };
     }
 };
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+
+
 
 
 

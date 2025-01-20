@@ -1,7 +1,7 @@
  export interface FilterOptions {
     page: number;
     limit: number;
-    РИОСВ?: string;
+    sourceId?: string | number;
     dateBefore?: string;
     dateAfter?: string;
     dateExact?: string;

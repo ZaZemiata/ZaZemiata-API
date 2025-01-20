@@ -49,13 +49,13 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
 router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
     try {
         // Extract query parameters
-        const { page, limit, РИОСВ, dateBefore, dateAfter, dateExact, containsText } = req.query;
+        const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = req.query;
 
         // Convert query parameters to expected types
         const filters = {
             page: Number(page) || 1,
             limit: Number(limit) || 10,
-            РИОСВ: РИОСВ ? String(РИОСВ) : undefined,
+            sourceId: sourceId ? Number(sourceId) : undefined, // Change here
             dateBefore: dateBefore ? String(dateBefore) : undefined,
             dateAfter: dateAfter ? String(dateAfter) : undefined,
             dateExact: dateExact ? String(dateExact) : undefined,
@@ -87,6 +87,7 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
         });
     }
 });
+
 
 
 // Export the router
