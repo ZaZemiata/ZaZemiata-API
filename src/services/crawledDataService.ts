@@ -123,10 +123,7 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
                 some: {
                     Sources: {
                         some: {
-                            display_name: {
-                                contains: РИОСВ,
-                                mode: "insensitive",
-                            },
+                            id: РИОСВ, // Search of ID 
                         },
                     },
                 },
@@ -153,9 +150,9 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
             ];
         }
 
-        // Fetch total count of filtered data without select or complex conditions
+        // Fetch total count of filtered data using the whereConditions
         const totalEntries = await prisma.crawledData.count({
-            where: whereConditions, // Apply where conditions directly without unnecessary select or nested structures
+            where: whereConditions,
         });
 
         // Fetch data based on the same where conditions
@@ -186,6 +183,7 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
         return { error: (error as Error).message };
     }
 };
+
 
 
 
