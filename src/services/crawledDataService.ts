@@ -56,82 +56,40 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
     }
 };
 
-// Get limited CrawledData records based on pagination provided in query params
-export const getCrawledDataPagination = async (page: number, limit: number): Promise<PaginationResult> => {
+// Get CrawledData records with filters and pagination
+export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
 
-    // Try to fetch data
-    try {
-        // Get total records of crawled data
-        const totalEntries = await prisma.crawledData.count();
-
-        // Get data filtered by limit and page
-        const data = await prisma.crawledData.findMany({
-            take: limit,
-            skip: (page - 1) * limit,
-
-            // Include related SourceUrls and Sources
-            include: {
-                SourceUrls: {
-                    select: {
-                        Sources: {
-
-                            // Select only display_name
-                            select: {
-                                display_name: true,
-                            },
-                        },
-                    },
-                },
-            },
-            orderBy: {
-                date: "desc",
-            },
-        });
-
-        // Calculate total pages
-        const total = Math.ceil(totalEntries / limit);
-
-        // Log success
-        logger.info("Fetched filtered crawled data successfully.");
-
-        // Return all crawled data
-        return { data, total };
-    }
-
-    // Catch errors 
-    catch (error) {
-
-        // Log the error
-        logger.error("Error fetching crawled data:", error);
-
-        // Return error object
-        return { error: (error as Error).message };
-    }
-};
-
-export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
     // Destructure the filters from the input object
     const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = filters;
 
+    // Try to fetch data
     try {
+
         // Initialize an empty object for the WHERE conditions
         const whereConditions: any = {};
 
         // If a sourceId filter is provided, apply it to the SourceUrls table
         if (sourceId) {
+
+            // Add the source_id filter to the SourceUrls table
             whereConditions.SourceUrls = {
-                source_id: sourceId,  // Search by source_id in the SourceUrls table
+                source_id: sourceId,
             };
         }
 
         // Add filters for the date field
         if (dateExact) {
-            whereConditions.date = new Date(dateExact);  // If exact date is provided, filter by that date
+
+            // If exact date is provided, filter by that date
+            whereConditions.date = new Date(dateExact);
+
         } else {
+
             // If dateBefore filter is provided, filter by dates before that date
             if (dateBefore) {
                 whereConditions.date = { lte: new Date(dateBefore) };  // Less than or equal to the provided date
             }
+
             // If dateAfter filter is provided, filter by dates after that date
             if (dateAfter) {
                 whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };  // Greater than or equal to the provided date
@@ -140,6 +98,8 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
 
         // If the containsText filter is provided, search the text field for that text (case insensitive)
         if (containsText) {
+
+            // Add the containsText filter to the text field
             whereConditions.OR = [
                 { text: { contains: containsText, mode: "insensitive" } },
             ];
@@ -175,7 +135,10 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
 
         // Return the paginated data and the total number of pages
         return { data, total };
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
         // Log error message if something goes wrong
         logger.error("Error fetching filtered crawled data:", error);
 
@@ -183,26 +146,3 @@ export const getCrawledDataWithFilters = async (filters: FilterOptions): Promise
         return { error: (error as Error).message };
     }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
