@@ -46,7 +46,7 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
  * @endpoint GET /api/crawled-data/filter
  * @description Fetch CrawledData records based on page and limit query params.
  */
-router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
+router.get("/api/crawled-data/filter", async (req: any, res: any) => {
     try {
         // List of allowed query parameters
         const validParams = ['page', 'limit', 'sourceId', 'dateBefore', 'dateAfter', 'dateExact', 'containsText'];
