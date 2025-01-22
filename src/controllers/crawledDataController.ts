@@ -55,15 +55,27 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
         const filters = {
             page: Number(page) || 1,
             limit: Number(limit) || 10,
-            sourceId: sourceId ? Number(sourceId) : undefined, // Change here
+            sourceId: sourceId 
+                ? (typeof sourceId === 'string' 
+                    ? sourceId.split(',').map((id: string) => Number(id)) // Ако е низ, разделяме и преобразуваме
+                    : Array.isArray(sourceId) 
+                    ? sourceId.map((id: any) => Number(id)) // Ако е масив, преобразуваме елементите в числа
+                    : undefined) 
+                : undefined,
             dateBefore: dateBefore ? String(dateBefore) : undefined,
             dateAfter: dateAfter ? String(dateAfter) : undefined,
             dateExact: dateExact ? String(dateExact) : undefined,
             containsText: containsText ? String(containsText) : undefined,
         };
-
-        // Call the service with filters and pagination
-        const result = await getCrawledDataWithPaginationFilters(filters);
+        
+        // Преобразуване на sourceId в низ, ако е масив от числа
+        const finalSourceId = Array.isArray(filters.sourceId) ? filters.sourceId.join(',') : filters.sourceId;
+        
+        // Извикваме функцията с финалния параметър sourceId
+        const result = await getCrawledDataWithPaginationFilters({
+            ...filters,
+            sourceId: finalSourceId,
+        });
 
         // Check if an error occurred
         if ('error' in result) 

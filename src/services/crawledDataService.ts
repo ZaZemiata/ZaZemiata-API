@@ -56,93 +56,104 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
     }
 };
 
-// Get CrawledData records with filters and pagination
 export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
-
-    // Destructure the filters from the input object
     const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = filters;
 
-    // Try to fetch data
     try {
-
-        // Initialize an empty object for the WHERE conditions
         const whereConditions: any = {};
 
-        // If a sourceId filter is provided, apply it to the SourceUrls table
+        // Проверка за sourceId
         if (sourceId) {
+            console.log(`Received sourceId query parameter:`, sourceId);
 
-            // Add the source_id filter to the SourceUrls table
-            whereConditions.SourceUrls = {
-                source_id: sourceId,
-            };
-        }
+            let sourceIdArray: string[] = [];
+            // Проверка дали sourceId е низ
+            if (typeof sourceId === "string") {
+                sourceIdArray = sourceId.split(',').map(id => id.trim());
+            } else if (Array.isArray(sourceId)) {
+                sourceIdArray = sourceId.map(id => id.toString());
+            } else {
+                sourceIdArray = [sourceId.toString()];
+            }
 
-        // Add filters for the date field
-        if (dateExact) {
+            console.log(`Parsed sourceIdArray:`, sourceIdArray);
 
-            // If exact date is provided, filter by that date
-            whereConditions.date = new Date(dateExact);
+            // Филтриране на валидни sourceId
+            const validSourceIds = sourceIdArray.filter(id => !isNaN(Number(id)) && id !== "");
+            console.log(`Valid sourceIdArray:`, validSourceIds);
 
+            // Приложи филтъра за source_id
+            if (validSourceIds.length > 0) {
+                whereConditions.SourceUrls = {
+                    source_id: {
+                        in: validSourceIds.map(id => Number(id)),
+                    },
+                };
+            } else {
+                console.log(`No valid sourceIds found.`);
+            }
         } else {
+            console.log(`No sourceId filter applied.`);
+        }
 
-            // If dateBefore filter is provided, filter by dates before that date
+        // Добавяне на останалите филтри
+        if (dateExact) {
+            console.log(`Filtering by exact date:`, dateExact);
+            whereConditions.date = new Date(dateExact);
+        } else {
             if (dateBefore) {
-                whereConditions.date = { lte: new Date(dateBefore) };  // Less than or equal to the provided date
+                console.log(`Filtering by date before:`, dateBefore);
+                whereConditions.date = { lte: new Date(dateBefore) };
             }
-
-            // If dateAfter filter is provided, filter by dates after that date
             if (dateAfter) {
-                whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };  // Greater than or equal to the provided date
+                console.log(`Filtering by date after:`, dateAfter);
+                whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };
             }
         }
 
-        // If the containsText filter is provided, search the text field for that text (case insensitive)
         if (containsText) {
-
-            // Add the containsText filter to the text field
+            console.log(`Filtering by text containing:`, containsText);
             whereConditions.OR = [
                 { text: { contains: containsText, mode: "insensitive" } },
             ];
         }
 
-        // Count the total number of entries matching the filter conditions
-        const totalEntries = await prisma.crawledData.count({ where: whereConditions });
+        console.log(`Final whereConditions object:`, whereConditions);
 
-        // Fetch the data based on the filter conditions, pagination, and ordering
+        const totalEntries = await prisma.crawledData.count({ where: whereConditions });
+        console.log(`Total entries matching filters:`, totalEntries);
+
         const data = await prisma.crawledData.findMany({
             where: whereConditions,
-            take: limit,  // Limit the number of records per page
-            skip: (page - 1) * limit,  // Skip records for pagination
+            take: limit,
+            skip: (page - 1) * limit,
             include: {
                 SourceUrls: {
                     include: {
                         Sources: {
-                            select: {
-                                display_name: true,  // Select the display name of the related Source
-                            },
+                            select: { display_name: true },
                         },
                     },
                 },
             },
-            orderBy: { date: "desc" },  // Order the results by date in descending order
+            orderBy: { date: "desc" },
         });
 
-        // Calculate the total number of pages based on the total entries and limit
         const total = Math.ceil(totalEntries / limit);
+        console.log("Fetched filtered crawled data successfully.");
 
-        // Log success message
-        logger.info("Fetched filtered crawled data successfully.");
-
-        // Return the paginated data and the total number of pages
         return { data, total };
-    } 
-    
-    // Catch errors
-    catch (error) {
-        // Log error message if something goes wrong
-        logger.error("Error fetching filtered crawled data:", error);
-
-        // Return the error message
+    } catch (error) {
+        console.error("Error fetching filtered crawled data:", error);
         return { error: (error as Error).message };
     }
 };
+
+
+
+
+
+
+
+
+
