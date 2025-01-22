@@ -24,12 +24,12 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
     // Try to fetch data
     try {
         // Call the service
-        const data = await getAllCrawledData(req, res)
+        const data = await getAllCrawledData(req, res);
 
         logger.info("Fetched all crawled data successfully.");
 
         // Send response
-        res.status(200).send(data)
+        res.status(200).send(data);
     } 
     
     // Catch errors
@@ -38,16 +38,28 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
         logger.error(error);
 
         // Log the error and respond with an error message
-        res.status(500).send((error as ErrorType).message)
+        res.status(500).send((error as ErrorType).message);
     }
 });
 
 /**
- * @endpoint GET /api/crawled-data
+ * @endpoint GET /api/crawled-data/filter
  * @description Fetch CrawledData records based on page and limit query params.
  */
 router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
     try {
+        // List of allowed query parameters
+        const validParams = ['page', 'limit', 'sourceId', 'dateBefore', 'dateAfter', 'dateExact', 'containsText'];
+
+        // Check for invalid parameters
+        const invalidParams = Object.keys(req.query).filter(param => !validParams.includes(param));
+        if (invalidParams.length > 0) {
+            return res.status(400).send({
+                status: 'error',
+                message: `Invalid query parameters: ${invalidParams.join(', ')}`,
+            });
+        }
+
         // Extract query parameters
         const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = req.query;
 
@@ -57,9 +69,9 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
             limit: Number(limit) || 10,
             sourceId: sourceId 
                 ? (typeof sourceId === 'string' 
-                    ? sourceId.split(',').map((id: string) => Number(id)) // Ако е низ, разделяме и преобразуваме
+                    ? sourceId.split(',').map((id: string) => Number(id)) // If it's a string, split and convert
                     : Array.isArray(sourceId) 
-                    ? sourceId.map((id: any) => Number(id)) // Ако е масив, преобразуваме елементите в числа
+                    ? sourceId.map((id: any) => Number(id)) // If it's an array, convert elements to numbers
                     : undefined) 
                 : undefined,
             dateBefore: dateBefore ? String(dateBefore) : undefined,
@@ -67,17 +79,17 @@ router.get("/api/crawled-data/filter", async (req: Request, res: Response) => {
             dateExact: dateExact ? String(dateExact) : undefined,
             containsText: containsText ? String(containsText) : undefined,
         };
-        
-        // Преобразуване на sourceId в низ, ако е масив от числа
+
+        // Convert sourceId to string if it's an array of numbers
         const finalSourceId = Array.isArray(filters.sourceId) ? filters.sourceId.join(',') : filters.sourceId;
-        
-        // Извикваме функцията с финалния параметър sourceId
+
+        // Call the service with filters
         const result = await getCrawledDataWithPaginationFilters({
             ...filters,
             sourceId: finalSourceId,
         });
 
-        // Check if an error occurred
+        // Check for errors in the result
         if ('error' in result) 
             throw new Error(result.error);
 
