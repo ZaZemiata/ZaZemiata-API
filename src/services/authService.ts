@@ -71,7 +71,7 @@ export const loginUser = async (id: string) => {
     return { token, is_admin };
 };
 
-export const isUserAdmin = async (userId: number) => {
+export const isUserAdmin = async (userId: number | bigint) => {
     
     // Get user
     const user = await prisma.users.findUnique({ where: { id: userId } });
