@@ -47,7 +47,10 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
  * @description Fetch CrawledData records based on page and limit query params.
  */
 router.get("/api/crawled-data/filter", async (req: any, res: any) => {
+
+    // Try to fetch data
     try {
+
         // List of allowed query parameters for filtering and pagination
         const validParams = ['page', 'limit', 'sourceId', 'dateBefore', 'dateAfter', 'dateExact', 'containsText', 'order'];
         const validOrder = ["asc", "desc"]; // Allowed values for sorting order
@@ -73,7 +76,7 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
             
             // Default to 1 if `page` is not provided
             page: Number(page) || 1,
-            
+
             // Default to 10 if `limit` is not provided
             limit: Number(limit) || 10,
 
@@ -123,7 +126,11 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
             },
             data: result.data, // Filtered crawled data
         });
-    } catch (error) {
+    } 
+    
+    // Catch errors
+    catch (error) {
+
         // Handle any errors that occur during processing
         res.status(400).send({
             status: 'error',
