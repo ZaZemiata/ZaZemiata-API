@@ -4,12 +4,15 @@
  * @module crawledDataService.ts
  * @autor Hristo Georgiev <hristogeorgiew84@gmail.com>
  * @autor Daniel Batanov <batanoff.s@protonmail.com>
+ * @autor Hristo Georgiev <hristogeorgiew84@gmail.com>
+ * @autor Daniel Batanov <batanoff.s@protonmail.com>
  */
 
 import prisma from "../db/prisma/prisma";
 import { Request, Response } from "express";
 import logger from "../utils/logger"; // Import winston logger
 import { PaginationResult } from "../types/pagination";  // Import types
+import { FilterOptions } from '../types/crawledDataFilters';
 import { FilterOptions } from '../types/crawledDataFilters';
 
 // Get all CrawledData records with related SourceUrls and Sources
@@ -157,6 +160,7 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
             include: {
                 SourceUrls: {
                     include: {
+                    include: {
                         Sources: {
                             select: { display_name: true },
                         },
@@ -166,7 +170,7 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
             orderBy: { date: order },
         });
 
-        // Calculate total pages
+        // Calculate the total number of pages based on the total entries and limit
         const total = Math.ceil(totalEntries / limit);
 
         // Return data and total pages
@@ -175,6 +179,8 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
 
     //  Catch errors
     catch (error) {
+        // Log error message if something goes wrong
+        logger.error("Error fetching filtered crawled data:", error);
 
         // Log the error
         console.error("Error fetching filtered crawled data:", error);
