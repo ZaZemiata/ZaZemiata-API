@@ -18,7 +18,7 @@ const router = express.Router();
  * @endpoint GET /api/users
  * @description Fetch all user records.
  */
-router.get("/api/users", async (req: Request, res: Response) => {
+router.get("/api/users", isAdmin, async (req: Request, res: Response) => {
 
     // Try
     try {
