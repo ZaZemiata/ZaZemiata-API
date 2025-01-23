@@ -13,6 +13,7 @@ import sourceController from "./controllers/sourceController"
 import crawledDataController from "./controllers/crawledDataController"
 import sourceUrlsController from "./controllers/sourceUrlsController"
 import authController from "./controllers/authController"
+import usersController from './controllers/usersController'
 
 //Crete a router
 const router = express.Router();
@@ -23,6 +24,7 @@ router.use(sourceController)
 router.use(crawledDataController)
 router.use(sourceUrlsController)
 router.use(authController)
+router.use(usersController)
 
 //Export a router
 export default router
