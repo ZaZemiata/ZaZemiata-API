@@ -10,6 +10,7 @@ import { Request, Response } from "express";
 import logger from "../utils/logger"; // Import winston logger
 import { toggleStatus, getAll } from "../services/usersService";
 import { isAdmin } from "../middlewares/isAdmin";
+import { isUserAdmin } from "../services/authService";
 
 // Create a new router
 const router = express.Router();
@@ -56,13 +57,22 @@ router.post("/api/users", isAdmin, async (req: Request, res: Response) => {
 
         // Is userId missing
         if(!userId) {
-            res.status(400).send({ error: 'Missing userId!' });
+            res.status(404).send({ error: 'Missing user id!' });
             return;
         }
 
         // Invalid ID
         if (isNaN(Number(userId)) || (typeof userId !== 'number' && typeof userId !== 'bigint')) {
             res.status(400).send({ error: 'ID must be a number!' });
+            return;
+        }
+
+        // Is the target user an admin
+        const targetUser = await isUserAdmin(userId);
+
+        // Status change forbidden for admin users
+        if(!targetUser) {
+            res.status(403).send({ error: "Forbidden: This user is an admin!" });
             return;
         }
 
@@ -80,7 +90,7 @@ router.post("/api/users", isAdmin, async (req: Request, res: Response) => {
         logger.error("Failed to update user status:", error);
 
         // Send a server error message
-        res.status(500).json({ message: "Failed to update user status." });
+        res.status(500).json({ message: "Internal server error while updating user status." });
     }
 });
 
