@@ -54,7 +54,10 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
 
         // Check for invalid query parameters in the request
         const invalidParams = Object.keys(req.query).filter(param => !validParams.includes(param));
+
+        // Params length check
         if (invalidParams.length > 0) {
+
             // If there are invalid parameters, return an error response
             return res.status(400).send({
                 status: 'error',
@@ -67,8 +70,14 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
 
         // Convert query parameters to expected types
         const filters = {
-            page: Number(page) || 1, // Default to 1 if `page` is not provided
-            limit: Number(limit) || 10, // Default to 10 if `limit` is not provided
+            
+            // Default to 1 if `page` is not provided
+            page: Number(page) || 1,
+            
+            // Default to 10 if `limit` is not provided
+            limit: Number(limit) || 10,
+
+            // Convert `sourceId` to an array of numbers if it's a string or an array
             sourceId: sourceId 
                 ? (typeof sourceId === 'string' 
                     ? sourceId.split(',').map((id: string) => Number(id)) // Split comma-separated IDs and convert to numbers
@@ -76,11 +85,21 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
                     ? sourceId.map((id: any) => Number(id)) // Convert array of IDs to numbers
                     : undefined) 
                 : undefined,
-            dateBefore: dateBefore ? String(dateBefore) : undefined, // Convert `dateBefore` to string if provided
-            dateAfter: dateAfter ? String(dateAfter) : undefined, // Convert `dateAfter` to string if provided
-            dateExact: dateExact ? String(dateExact) : undefined, // Convert `dateExact` to string if provided
-            containsText: containsText ? String(containsText) : undefined, // Convert `containsText` to string if provided
-            order: validOrder.includes(order) ? order : "desc", // Validate `order` and default to "desc" if invalid
+
+            // Convert `dateBefore` to string if provided
+            dateBefore: dateBefore ? String(dateBefore) : undefined, 
+
+            // Convert `dateAfter` to string if provided
+            dateAfter: dateAfter ? String(dateAfter) : undefined,
+
+            // Convert `dateExact` to string if provided
+            dateExact: dateExact ? String(dateExact) : undefined,
+
+            // Convert `containsText` to string if provided
+            containsText: containsText ? String(containsText) : undefined, 
+
+            // Validate `order` and default to "desc" if invalid
+            order: validOrder.includes(order) ? order : "desc", 
         };
 
         // Convert sourceId to a comma-separated string if it's an array of numbers
@@ -112,8 +131,6 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
         });
     }
 });
-
-
 
 // Export the router
 export default router;

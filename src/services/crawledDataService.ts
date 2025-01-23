@@ -56,25 +56,52 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
     }
 };
 
+// Get CrawledData records based on page and limit query params
 export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
+
+    // Destructure filters
     const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText, order = "desc" } = filters;
 
+    // Try to fetch data
     try {
+
+        // Define where conditions
         const whereConditions: any = {};
 
-        // Проверка за sourceId
+        // Define sourceId filter
         if (sourceId) {
+
+            // SourceId array
             let sourceIdArray: string[] = [];
+
+            // Check if sourceId is a string
             if (typeof sourceId === "string") {
+
+                // Split sourceId by comma and trim each id
                 sourceIdArray = sourceId.split(',').map(id => id.trim());
-            } else if (Array.isArray(sourceId)) {
+            } 
+            
+            // Check if sourceId is an array
+            else if (Array.isArray(sourceId)) {
+
+                // Convert sourceId to string
                 sourceIdArray = sourceId.map(id => id.toString());
-            } else {
+            } 
+            
+            // Else convert sourceId to string
+            else {
+
+                // Convert sourceId to string
                 sourceIdArray = [sourceId.toString()];
             }
 
+            // Filter valid sourceIds
             const validSourceIds = sourceIdArray.filter(id => !isNaN(Number(id)) && id !== "");
+
+            // Check if validSourceIds is not empty
             if (validSourceIds.length > 0) {
+
+                // Add sourceUrls to whereConditions
                 whereConditions.SourceUrls = {
                     source_id: {
                         in: validSourceIds.map(id => Number(id)),
@@ -83,26 +110,46 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
             }
         }
 
-        // Добавяне на останалите филтри
+        // Define date filter
         if (dateExact) {
+
+            // Set date to exact date
             whereConditions.date = new Date(dateExact);
-        } else {
+        } 
+        
+        // Check if other date filters are provided
+        else {
+
+            // Check if dateBefore is provided
             if (dateBefore) {
+
+                // Set date to less than or equal to dateBefore
                 whereConditions.date = { lte: new Date(dateBefore) };
             }
+
+            // Check if dateAfter is provided
             if (dateAfter) {
+
+                // Set date to greater than or equal to dateAfter
                 whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };
             }
         }
 
+        // Define containsText filter
         if (containsText) {
+
+            // Add containsText to whereConditions
             whereConditions.OR = [
+
+                // Check if text contains containsText in a case-insensitive mode
                 { text: { contains: containsText, mode: "insensitive" } },
             ];
         }
 
+        // Get total entries
         const totalEntries = await prisma.crawledData.count({ where: whereConditions });
 
+        // Fetch data with pagination and filters
         const data = await prisma.crawledData.findMany({
             where: whereConditions,
             take: limit,
@@ -116,24 +163,23 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
                     },
                 },
             },
-            orderBy: { date: order }, // Включване на динамичен ред
+            orderBy: { date: order },
         });
 
+        // Calculate total pages
         const total = Math.ceil(totalEntries / limit);
 
+        // Return data and total pages
         return { data, total };
-    } catch (error) {
+    } 
+
+    //  Catch errors
+    catch (error) {
+
+        // Log the error
         console.error("Error fetching filtered crawled data:", error);
+
+        // Return error message
         return { error: (error as Error).message };
     }
 };
-
-
-
-
-
-
-
-
-
-
