@@ -1,4 +1,4 @@
- export interface FilterOptions {
+export interface FilterOptions {
     page: number;
     limit: number;
     sourceId?: string | number;
@@ -6,4 +6,6 @@
     dateAfter?: string;
     dateExact?: string;
     containsText?: string;
+    order?: "asc" | "desc"; 
 }
+

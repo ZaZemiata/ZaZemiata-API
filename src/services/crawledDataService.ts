@@ -57,17 +57,14 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
 };
 
 export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions): Promise<PaginationResult> => {
-    const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = filters;
+    const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText, order = "desc" } = filters;
 
     try {
         const whereConditions: any = {};
 
         // Проверка за sourceId
         if (sourceId) {
-            console.log(`Received sourceId query parameter:`, sourceId);
-
             let sourceIdArray: string[] = [];
-            // Проверка дали sourceId е низ
             if (typeof sourceId === "string") {
                 sourceIdArray = sourceId.split(',').map(id => id.trim());
             } else if (Array.isArray(sourceId)) {
@@ -76,52 +73,35 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
                 sourceIdArray = [sourceId.toString()];
             }
 
-            console.log(`Parsed sourceIdArray:`, sourceIdArray);
-
-            // Филтриране на валидни sourceId
             const validSourceIds = sourceIdArray.filter(id => !isNaN(Number(id)) && id !== "");
-            console.log(`Valid sourceIdArray:`, validSourceIds);
-
-            // Приложи филтъра за source_id
             if (validSourceIds.length > 0) {
                 whereConditions.SourceUrls = {
                     source_id: {
                         in: validSourceIds.map(id => Number(id)),
                     },
                 };
-            } else {
-                console.log(`No valid sourceIds found.`);
             }
-        } else {
-            console.log(`No sourceId filter applied.`);
         }
 
         // Добавяне на останалите филтри
         if (dateExact) {
-            console.log(`Filtering by exact date:`, dateExact);
             whereConditions.date = new Date(dateExact);
         } else {
             if (dateBefore) {
-                console.log(`Filtering by date before:`, dateBefore);
                 whereConditions.date = { lte: new Date(dateBefore) };
             }
             if (dateAfter) {
-                console.log(`Filtering by date after:`, dateAfter);
                 whereConditions.date = { ...whereConditions.date, gte: new Date(dateAfter) };
             }
         }
 
         if (containsText) {
-            console.log(`Filtering by text containing:`, containsText);
             whereConditions.OR = [
                 { text: { contains: containsText, mode: "insensitive" } },
             ];
         }
 
-        console.log(`Final whereConditions object:`, whereConditions);
-
         const totalEntries = await prisma.crawledData.count({ where: whereConditions });
-        console.log(`Total entries matching filters:`, totalEntries);
 
         const data = await prisma.crawledData.findMany({
             where: whereConditions,
@@ -136,11 +116,10 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
                     },
                 },
             },
-            orderBy: { date: "desc" },
+            orderBy: { date: order }, // Включване на динамичен ред
         });
 
         const total = Math.ceil(totalEntries / limit);
-        console.log("Fetched filtered crawled data successfully.");
 
         return { data, total };
     } catch (error) {
@@ -148,6 +127,7 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
         return { error: (error as Error).message };
     }
 };
+
 
 
 

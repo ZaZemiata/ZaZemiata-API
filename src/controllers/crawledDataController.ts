@@ -24,12 +24,12 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
     // Try to fetch data
     try {
         // Call the service
-        const data = await getAllCrawledData(req, res);
+        const data = await getAllCrawledData(req, res)
 
         logger.info("Fetched all crawled data successfully.");
 
         // Send response
-        res.status(200).send(data);
+        res.status(200).send(data)
     } 
     
     // Catch errors
@@ -38,85 +38,82 @@ router.get("/api/crawled-data", async (req: Request, res: Response) => {
         logger.error(error);
 
         // Log the error and respond with an error message
-        res.status(500).send((error as ErrorType).message);
+        res.status(500).send((error as ErrorType).message)
     }
 });
 
 /**
- * @endpoint GET /api/crawled-data/filter
+ * @endpoint GET /api/crawled-data
  * @description Fetch CrawledData records based on page and limit query params.
  */
 router.get("/api/crawled-data/filter", async (req: any, res: any) => {
     try {
-        // List of allowed query parameters
-        const validParams = ['page', 'limit', 'sourceId', 'dateBefore', 'dateAfter', 'dateExact', 'containsText'];
+        // List of allowed query parameters for filtering and pagination
+        const validParams = ['page', 'limit', 'sourceId', 'dateBefore', 'dateAfter', 'dateExact', 'containsText', 'order'];
+        const validOrder = ["asc", "desc"]; // Allowed values for sorting order
 
-        // Check for invalid parameters
+        // Check for invalid query parameters in the request
         const invalidParams = Object.keys(req.query).filter(param => !validParams.includes(param));
         if (invalidParams.length > 0) {
+            // If there are invalid parameters, return an error response
             return res.status(400).send({
                 status: 'error',
                 message: `Invalid query parameters: ${invalidParams.join(', ')}`,
             });
         }
 
-        // Extract query parameters
-        const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText } = req.query;
+        // Extract query parameters from the request
+        const { page, limit, sourceId, dateBefore, dateAfter, dateExact, containsText, order } = req.query;
 
         // Convert query parameters to expected types
         const filters = {
-            page: Number(page) || 1,
-            limit: Number(limit) || 10,
+            page: Number(page) || 1, // Default to 1 if `page` is not provided
+            limit: Number(limit) || 10, // Default to 10 if `limit` is not provided
             sourceId: sourceId 
                 ? (typeof sourceId === 'string' 
-                    ? sourceId.split(',').map((id: string) => Number(id)) // If it's a string, split and convert
+                    ? sourceId.split(',').map((id: string) => Number(id)) // Split comma-separated IDs and convert to numbers
                     : Array.isArray(sourceId) 
-                    ? sourceId.map((id: any) => Number(id)) // If it's an array, convert elements to numbers
+                    ? sourceId.map((id: any) => Number(id)) // Convert array of IDs to numbers
                     : undefined) 
                 : undefined,
-            dateBefore: dateBefore ? String(dateBefore) : undefined,
-            dateAfter: dateAfter ? String(dateAfter) : undefined,
-            dateExact: dateExact ? String(dateExact) : undefined,
-            containsText: containsText ? String(containsText) : undefined,
+            dateBefore: dateBefore ? String(dateBefore) : undefined, // Convert `dateBefore` to string if provided
+            dateAfter: dateAfter ? String(dateAfter) : undefined, // Convert `dateAfter` to string if provided
+            dateExact: dateExact ? String(dateExact) : undefined, // Convert `dateExact` to string if provided
+            containsText: containsText ? String(containsText) : undefined, // Convert `containsText` to string if provided
+            order: validOrder.includes(order) ? order : "desc", // Validate `order` and default to "desc" if invalid
         };
 
-        // Convert sourceId to string if it's an array of numbers
+        // Convert sourceId to a comma-separated string if it's an array of numbers
         const finalSourceId = Array.isArray(filters.sourceId) ? filters.sourceId.join(',') : filters.sourceId;
 
-        // Call the service with filters
+        // Call the service to fetch filtered data with pagination
         const result = await getCrawledDataWithPaginationFilters({
             ...filters,
             sourceId: finalSourceId,
         });
 
-        // Check for errors in the result
-        if ('error' in result) 
-            throw new Error(result.error);
+        // Check if the service returned an error
+        if ('error' in result) throw new Error(result.error);
 
-        // Send response with data and pagination info
+        // Send the response with filtered data and pagination info
         res.status(200).send({
             status: 'success',
             pagination: {
-                totalPages: result.total,
-                currentPage: filters.page,
+                totalPages: result.total, // Total number of pages available
+                currentPage: filters.page, // Current page number
             },
-            data: result.data,
+            data: result.data, // Filtered crawled data
         });
-    } 
-    
-    // Catch errors
-    catch (error) {
-
-        // Log the error
-        logger.error("Error fetching filtered crawled data:", error);
-
-        // Send a bad request response
+    } catch (error) {
+        // Handle any errors that occur during processing
         res.status(400).send({
             status: 'error',
-            message: (error as ErrorType).message,
+            message: (error as ErrorType).message, // Return the error message to the client
         });
     }
 });
+
+
 
 // Export the router
 export default router;
