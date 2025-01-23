@@ -9,7 +9,6 @@
 // Import dependencies
 import { Router, Request, Response } from "express";
 import { getAllCrawledData, getCrawledDataWithPaginationFilters } from "../services/crawledDataService";
-import { getAllCrawledData, getCrawledDataWithPaginationFilters } from "../services/crawledDataService";
 import { ErrorType } from "../types/errorType";
 import logger from "../utils/logger";
 
@@ -127,8 +126,6 @@ router.get("/api/crawled-data/filter", async (req: any, res: any) => {
             },
             data: result.data, // Filtered crawled data
         });
-    } 
-    
     } 
     
     // Catch errors
