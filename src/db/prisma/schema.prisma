@@ -8,15 +8,18 @@ datasource db {
 }
 
 model CrawlTasks {
-  id           BigInt          @id @default(autoincrement())
-  status       CrawlTaskStatus @default(PENDING)
-  completed_at DateTime?
-  error        String?
-  created_at   DateTime        @default(now())
-  source_id    BigInt
-  Sources      Sources         @relation(fields: [source_id], references: [id])
+  id                     BigInt          @id @default(autoincrement())
+  status                 CrawlTaskStatus @default(PENDING)
+  completed_at           DateTime?
+  error                  String?
+  created_at             DateTime        @default(now())
+  source_id              BigInt
+  crawl_duration_seconds Float?
+  started_at             DateTime?
+  Sources                Sources         @relation(fields: [source_id], references: [id])
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model CrawledData {
   id            BigInt     @id @default(autoincrement())
   text          String
@@ -25,8 +28,6 @@ model CrawledData {
   contractor    String?    @db.VarChar(255)
   source_url_id BigInt
   SourceUrls    SourceUrls @relation(fields: [source_url_id], references: [id])
-
-  @@unique([contractor, date, source_url_id])
 }
 
 model KeyWords {
