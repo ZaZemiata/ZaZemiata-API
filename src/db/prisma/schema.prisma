@@ -27,6 +27,7 @@ model CrawledData {
   created_at    DateTime   @default(now())
   contractor    String?    @db.VarChar(255)
   source_url_id BigInt
+  sourceArticle String?    @db.VarChar(1024)
   SourceUrls    SourceUrls @relation(fields: [source_url_id], references: [id])
 }
 
