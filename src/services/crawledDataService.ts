@@ -25,6 +25,7 @@ export const getAllCrawledData = async (req: Request, res: Response) => {
             include: {
                 SourceUrls: {
                     select: {
+                        url: true,
                         Sources: {
                             // Select only display_name
                             select: {
@@ -157,7 +158,8 @@ export const getCrawledDataWithPaginationFilters = async (filters: FilterOptions
             skip: (page - 1) * limit,
             include: {
                 SourceUrls: {
-                    include: {
+                    select: {
+                        url: true,
                         Sources: {
                             select: { display_name: true },
                         },
