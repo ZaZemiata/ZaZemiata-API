@@ -98,7 +98,7 @@ router.post("/api/users", isAdmin, async (req: Request, res: Response) => {
  * @endpoint DELETE /api/users/:id
  * @description Delete a user by ID. Only admins can delete non-admin users.
  */
-router.delete("/api/users/:id", isAdmin, async (req: Request, res: Response) => {
+router.delete("/api/users/delete/:id", isAdmin, async (req: Request, res: Response) => {
     // Get user ID from request params
     const userId = Number(req.params.id);
 
