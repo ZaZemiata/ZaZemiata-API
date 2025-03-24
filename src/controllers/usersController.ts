@@ -8,7 +8,7 @@
 import express from "express";
 import { Request, Response } from "express";
 import logger from "../utils/logger"; // Import winston logger
-import { toggleStatus, getAll } from "../services/usersService";
+import { toggleStatus, getAll, deleteUser } from "../services/usersService";
 import { isAdmin } from "../middlewares/isAdmin";
 import { isUserAdmin } from "../services/authService";
 
@@ -91,6 +91,48 @@ router.post("/api/users", isAdmin, async (req: Request, res: Response) => {
 
         // Send a server error message
         res.status(500).json({ message: "Internal server error while updating user status." });
+    }
+});
+
+/**
+ * @endpoint DELETE /api/users/:id
+ * @description Delete a user by ID. Only admins can delete non-admin users.
+ */
+router.delete("/api/users/:id", isAdmin, async (req: Request, res: Response) => {
+    // Get user ID from request params
+    const userId = Number(req.params.id);
+
+    // Try to delete user
+    try {
+        // Validate ID
+        if (isNaN(userId)) {
+            res.status(400).send({ error: 'ID must be a number!' });
+            return;
+        }
+
+        // Delete user
+        const deletedUser = await deleteUser(userId);
+
+        // Return success response
+        res.status(200).json({ message: "User deleted successfully", user: deletedUser });
+    } 
+    // Catch errors
+    catch (error: any) {
+        // Log the error
+        logger.error("Failed to delete user:", error);
+
+        // Handle specific error cases
+        if (error.message.includes("not found")) {
+            res.status(404).json({ message: error.message });
+            return;
+        }
+        if (error.message.includes("admin user")) {
+            res.status(403).json({ message: error.message });
+            return;
+        }
+
+        // Send a server error message
+        res.status(500).json({ message: "Internal server error while deleting user." });
     }
 });
 
